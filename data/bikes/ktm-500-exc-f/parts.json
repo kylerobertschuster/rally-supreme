@@ -1,0 +1,32 @@
+[
+  {
+    "id": "front-wheel",
+    "name": "Front Wheel Assembly",
+    "partNumber": "KTM-21-EXC-F-001",
+    "tags": ["chassis", "rolling"],
+    "notes": "Lightweight 21-inch wheel with off-road tire and disc hub.",
+    "links": [
+      { "label": "OEM spec sheet", "url": "https://www.ktm.com" }
+    ]
+  },
+  {
+    "id": "front-fork",
+    "name": "Front Fork",
+    "partNumber": "KTM-48-WP-002",
+    "tags": ["suspension"],
+    "notes": "WP XPLOR 48 fork tuned for enduro terrain.",
+    "links": [
+      { "label": "Suspension guide", "url": "https://www.wp-suspension.com" }
+    ]
+  },
+  {
+    "id": "brake-caliper",
+    "name": "Front Brake Caliper",
+    "partNumber": "KTM-BREMBO-003",
+    "tags": ["brakes"],
+    "notes": "High-performance caliper with braided line routing.",
+    "links": [
+      { "label": "Brembo overview", "url": "https://www.brembo.com" }
+    ]
+  }
+]

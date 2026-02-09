@@ -1,0 +1,26 @@
+[
+  {
+    "partId": "front-wheel",
+    "mode": "norm",
+    "x": 0.38,
+    "y": 0.55,
+    "w": 0.22,
+    "h": 0.22
+  },
+  {
+    "partId": "front-fork",
+    "mode": "norm",
+    "x": 0.34,
+    "y": 0.25,
+    "w": 0.18,
+    "h": 0.26
+  },
+  {
+    "partId": "brake-caliper",
+    "mode": "norm",
+    "x": 0.47,
+    "y": 0.62,
+    "w": 0.08,
+    "h": 0.08
+  }
+]

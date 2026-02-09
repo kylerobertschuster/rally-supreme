@@ -116,7 +116,7 @@ export function BikeCanvas({
   }
 
   return (
-    <div className="w-full h-[70vh] rounded-2xl overflow-hidden border border-black/10 bg-neutral-100">
+    <div className="w-full h-[70vh] rounded-3xl overflow-hidden border border-black/10 bg-[radial-gradient(circle_at_20%_20%,#ffffff,rgba(255,255,255,0.65),#e5e5e5)] shadow-[0_20px_80px_rgba(0,0,0,0.15)]">
       <div
         ref={containerRef}
         className="w-full h-full relative select-none"
@@ -173,10 +173,15 @@ export function BikeCanvas({
         </div>
 
         {/* HUD */}
-        <div className="absolute left-3 bottom-3 bg-white/90 border border-black/10 rounded-lg px-3 py-2 text-xs">
+        <div className="absolute left-4 bottom-4 bg-white/90 border border-black/10 rounded-2xl px-4 py-3 text-xs shadow-lg">
           <div className="font-semibold">PAN: DRAG</div>
           <div className="font-semibold">ZOOM: MOUSE WHEEL</div>
           <div className="text-black/60">SCALE: {scale.toFixed(2)}</div>
+        </div>
+
+        <div className="absolute right-4 top-4 rounded-2xl border border-black/10 bg-white/90 px-4 py-3 text-xs shadow-lg">
+          <div className="font-semibold">INTERACTIVE HOTSPOTS</div>
+          <div className="text-black/60">Click a region to open part details.</div>
         </div>
       </div>
     </div>

@@ -7,10 +7,11 @@ export default async function Page({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const { diagram, parts, hotspots } = loadBike(slug);
+  const { bike, diagram, parts, hotspots } = loadBike(slug);
 
   return (
     <BikeClient
+      bike={bike}
       diagram={diagram}
       parts={parts}
       hotspots={hotspots}
