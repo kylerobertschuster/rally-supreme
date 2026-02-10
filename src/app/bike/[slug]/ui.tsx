@@ -1,10 +1,11 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import type { Bike, Diagram, Hotspot, Part } from "@/lib/types";
 import { BikeCanvas } from "@/components/BikeCanvas";
 import { Bike3DCanvas } from "@/components/Bike3DCanvas";
 import { PartDrawer } from "@/components/PartDrawer";
+import { CategorizedPartsList } from "@/components/CategorizedPartsList";
 
 function CanvasLoading() {
   return (
@@ -34,6 +35,7 @@ export default function BikeClient({
   const [localParts, setLocalParts] = useState<Part[]>(parts);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [indexOpen, setIndexOpen] = useState(false);
+  const selectionSourceRef = useRef<"canvas" | "index" | null>(null);
 
   useEffect(() => {
     // listen for replacement events from PartDrawer
@@ -55,6 +57,14 @@ export default function BikeClient({
     () => localParts.find((p) => p.id === selectedId) ?? null,
     [localParts, selectedId]
   );
+
+  // Auto-open Index only when selection comes from canvas (not from index list)
+  useEffect(() => {
+    if (selectionSourceRef.current === "canvas" && selectedId && !indexOpen) {
+      setIndexOpen(true);
+      selectionSourceRef.current = null; // Reset source after opening
+    }
+  }, [selectedId, indexOpen]);
 
   return (
     <div className="relative min-h-screen bg-[#e6e6e6] text-black">
@@ -81,7 +91,7 @@ export default function BikeClient({
             parts={localParts}
             selectedPartId={selectedId}
             onSelectPart={(id) => {
-              // select part but do not auto-open the Index overlay
+              selectionSourceRef.current = "canvas";
               setSelectedId(id);
             }}
           />
@@ -91,7 +101,7 @@ export default function BikeClient({
             hotspots={hotspots}
             selectedPartId={selectedId}
             onSelectPart={(id) => {
-              // select part but do not auto-open the Index overlay
+              selectionSourceRef.current = "canvas";
               setSelectedId(id);
             }}
           />
@@ -135,51 +145,15 @@ export default function BikeClient({
           <div className="mt-6 text-sm uppercase tracking-[0.2em] text-black/50">
             Parts List
           </div>
-          <div className="mt-3 max-h-[70vh] space-y-3 overflow-y-auto pr-2 text-base text-black/80">
-            {localParts.map((part, index) => {
-              const selected = selectedId === part.id;
-              return (
-                <div
-                  key={part.id}
-                  className="flex items-start justify-between gap-4 border-b border-black/10 pb-2"
-                >
-                  <button
-                    onClick={() => {
-                      setSelectedId(part.id);
-                      setIndexOpen(false);
-                    }}
-                    className={[
-                      "text-left transition",
-                      selected
-                        ? "text-black font-semibold"
-                        : "text-black/80 hover:text-black",
-                    ].join(" ")}
-                  >
-                    <span className="mr-2 text-black/40">{index + 1}.</span>
-                    {part.name}
-                  </button>
-
-                  {part.links?.length ? (
-                    <div className="flex flex-col items-end gap-1 text-sm">
-                      {part.links.map((link) => (
-                        <a
-                          key={link.url}
-                          href={link.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="underline text-black/70 hover:text-black"
-                        >
-                          {link.label}
-                        </a>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-sm text-black/40">Link pending</div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          <CategorizedPartsList
+            parts={localParts}
+            selectedId={selectedId}
+            selectedPart={selectedPart}
+            onSelectPart={(id) => {
+              setSelectedId(id);
+              setIndexOpen(false);
+            }}
+          />
         </div>
       </div>
     </div>

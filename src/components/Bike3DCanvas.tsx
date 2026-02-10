@@ -86,10 +86,10 @@ function partKeyFromName(name: string): PartKey {
 }
 
 function findMesh(obj: Object3D): Mesh | null {
-  if ((obj as Mesh).isMesh) return obj as Mesh;
+  if (obj instanceof Mesh) return obj;
   let current: Object3D | null = obj;
   while (current?.parent) {
-    if ((current.parent as Mesh).isMesh) return current.parent as Mesh;
+    if (current.parent instanceof Mesh) return current.parent;
     current = current.parent;
   }
   return null;
@@ -133,8 +133,8 @@ function classifyMesh(
 
 function meshMatchesKey(mesh: Mesh, key: PartKey | null) {
   if (!key) return false;
-  const zone = mesh.userData.zone as MeshZone | undefined;
-  const height = mesh.userData.height as MeshHeight | undefined;
+  const zone = mesh.userData.__rally_zone as MeshZone | undefined;
+  const height = mesh.userData.__rally_height as MeshHeight | undefined;
   if (!zone || !height) return false;
 
   switch (key) {
@@ -163,8 +163,8 @@ function meshMatchesKey(mesh: Mesh, key: PartKey | null) {
 }
 
 function keyFromMesh(mesh: Mesh): PartKey {
-  const zone = mesh.userData.zone as MeshZone | undefined;
-  const height = mesh.userData.height as MeshHeight | undefined;
+  const zone = mesh.userData.__rally_zone as MeshZone | undefined;
+  const height = mesh.userData.__rally_height as MeshHeight | undefined;
   if (!zone || !height) return "frame";
 
   if (zone === "front" && height === "top") return "handlebar";
@@ -202,18 +202,17 @@ function BikeModel({
   const scene = useMemo(() => {
     const cloned = gltf.scene.clone(true);
     cloned.traverse((obj) => {
-      if ((obj as Mesh).isMesh) {
-        const mesh = obj as Mesh;
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        const materials = Array.isArray(mesh.material)
-          ? mesh.material
-          : [mesh.material];
+      if (obj instanceof Mesh) {
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+        const materials = Array.isArray(obj.material)
+          ? obj.material
+          : [obj.material];
         materials.forEach((mat) => {
           const material = mat as MeshStandardMaterial | undefined;
           if (!material || !material.color) return;
-          if (!material.userData.baseColor) {
-            material.userData.baseColor = material.color.clone();
+          if (!material.userData.__rally_baseColor) {
+            material.userData.__rally_baseColor = material.color.clone();
           }
         });
       }
@@ -234,11 +233,10 @@ function BikeModel({
     return { scale: target / maxDim, center, size, lengthAxis };
   }, [scene]);
 
-  useMemo(() => {
+  useEffect(() => {
     scene.traverse((obj) => {
-      if ((obj as Mesh).isMesh) {
-        const mesh = obj as Mesh;
-        const meshBox = new Box3().setFromObject(mesh);
+      if (obj instanceof Mesh) {
+        const meshBox = new Box3().setFromObject(obj);
         const meshCenter = new Vector3();
         meshBox.getCenter(meshCenter);
         const { zone, height } = classifyMesh(
@@ -247,8 +245,8 @@ function BikeModel({
           size,
           lengthAxis
         );
-        mesh.userData.zone = zone;
-        mesh.userData.height = height;
+        obj.userData.__rally_zone = zone;
+        obj.userData.__rally_height = height;
       }
     });
   }, [scene, center, size, lengthAxis]);
@@ -287,25 +285,24 @@ function BikeModel({
     const explodeDistance = 0.45;
 
     scene.traverse((obj) => {
-      if ((obj as Mesh).isMesh) {
-        const mesh = obj as Mesh;
-        const materials = Array.isArray(mesh.material)
-          ? mesh.material
-          : [mesh.material];
+      if (obj instanceof Mesh) {
+        const materials = Array.isArray(obj.material)
+          ? obj.material
+          : [obj.material];
 
-        if (!mesh.userData.basePosition) {
-          mesh.userData.basePosition = mesh.position.clone();
+        if (!obj.userData.__rally_basePosition) {
+          obj.userData.__rally_basePosition = obj.position.clone();
         }
 
-        const matchesKey = meshMatchesKey(mesh, selectedKey);
+        const matchesKey = meshMatchesKey(obj, selectedKey);
         const isSelected =
-          (targetMeshUuid && mesh.uuid === targetMeshUuid) ||
+          (targetMeshUuid && obj.uuid === targetMeshUuid) ||
           (shouldHighlightByKey && matchesKey);
 
-        const basePosition = mesh.userData.basePosition as Vector3;
+        const basePosition = obj.userData.__rally_basePosition as Vector3;
         if (isSelected) {
           const meshWorld = new Vector3();
-          mesh.getWorldPosition(meshWorld);
+          obj.getWorldPosition(meshWorld);
           const dirWorld = meshWorld.clone().sub(centerWorld);
           if (dirWorld.lengthSq() < 0.0001) {
             dirWorld.set(0, 1, 0);
@@ -313,7 +310,7 @@ function BikeModel({
             dirWorld.normalize();
           }
           const offsetWorld = dirWorld.multiplyScalar(explodeDistance);
-          const parent = mesh.parent;
+          const parent = obj.parent;
           if (parent) {
             const parentWorldQuat = new Quaternion();
             const parentWorldScale = new Vector3();
@@ -323,27 +320,27 @@ function BikeModel({
               .clone()
               .applyQuaternion(parentWorldQuat.clone().invert());
             offsetLocal.divide(parentWorldScale);
-            mesh.position.copy(basePosition.clone().add(offsetLocal));
+            obj.position.copy(basePosition.clone().add(offsetLocal));
           } else {
-            mesh.position.copy(basePosition.clone().add(offsetWorld));
+            obj.position.copy(basePosition.clone().add(offsetWorld));
           }
         } else {
-          mesh.position.copy(basePosition);
+          obj.position.copy(basePosition);
         }
 
         materials.forEach((mat) => {
           const material = mat as MeshStandardMaterial | undefined;
           if (!material || !material.color) return;
-          if (!material.userData.baseColor) {
-            material.userData.baseColor = material.color.clone();
+          if (!material.userData.__rally_baseColor) {
+            material.userData.__rally_baseColor = material.color.clone();
           }
-          if (material.emissive && !material.userData.baseEmissive) {
-            material.userData.baseEmissive = material.emissive.clone();
-            material.userData.baseEmissiveIntensity =
+          if (material.emissive && !material.userData.__rally_baseEmissive) {
+            material.userData.__rally_baseEmissive = material.emissive.clone();
+            material.userData.__rally_baseEmissiveIntensity =
               material.emissiveIntensity ?? 0;
           }
 
-          const base = material.userData.baseColor as Color;
+          const base = material.userData.__rally_baseColor as Color;
           const inverse = new Color(1 - base.r, 1 - base.g, 1 - base.b);
 
           if (isSelected) {
@@ -357,10 +354,10 @@ function BikeModel({
           } else {
             material.color.copy(base);
             if (material.emissive) {
-              const baseEmissive = material.userData.baseEmissive as Color;
+              const baseEmissive = material.userData.__rally_baseEmissive as Color;
               material.emissive.copy(baseEmissive ?? new Color(0, 0, 0));
               material.emissiveIntensity =
-                material.userData.baseEmissiveIntensity ?? 0;
+                material.userData.__rally_baseEmissiveIntensity ?? 0;
             }
           }
         });
@@ -376,11 +373,10 @@ function BikeModel({
 
     const meshGroups: Record<string, Mesh[]> = {};
     scene.traverse((obj) => {
-      if ((obj as Mesh).isMesh) {
-        const mesh = obj as Mesh;
-        const k = keyFromMesh(mesh);
+      if (obj instanceof Mesh) {
+        const k = keyFromMesh(obj);
         meshGroups[k] = meshGroups[k] || [];
-        meshGroups[k].push(mesh);
+        meshGroups[k].push(obj);
       }
     });
 
