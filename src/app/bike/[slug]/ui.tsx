@@ -1,28 +1,59 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import type { Bike, Diagram, Hotspot, Part } from "@/lib/types";
 import { BikeCanvas } from "@/components/BikeCanvas";
 import { Bike3DCanvas } from "@/components/Bike3DCanvas";
 import { PartDrawer } from "@/components/PartDrawer";
 
+function CanvasLoading() {
+  return (
+    <div className="relative h-screen bg-[#e6e6e6] flex items-center justify-center">
+      <div className="text-center">
+        <div className="inline-block">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-black/20 border-t-black/60"></div>
+        </div>
+        <p className="mt-4 text-sm text-black/60">Loading 3D model...</p>
+      </div>
+    </div>
+  );
+}
+
 export default function BikeClient({
   bike,
   diagram,
   parts,
-  hotspots
+  hotspots,
 }: {
   bike: Bike;
   diagram: Diagram;
   parts: Part[];
   hotspots: Hotspot[];
 }) {
+  // local, mutable copy of parts so we can apply replacements
+  const [localParts, setLocalParts] = useState<Part[]>(parts);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [indexOpen, setIndexOpen] = useState(false);
 
+  useEffect(() => {
+    // listen for replacement events from PartDrawer
+    function onReplace(e: Event) {
+      const ev = e as CustomEvent<{ originalId: string; alternative: Part }>;
+      const { originalId, alternative } = ev.detail;
+      setLocalParts((prev) =>
+        prev.map((p) => (p.id === originalId ? { ...p, replacement: alternative } : p))
+      );
+      // show the updated part in the drawer
+      setSelectedId(originalId);
+    }
+
+    window.addEventListener("part:replace", onReplace as EventListener);
+    return () => window.removeEventListener("part:replace", onReplace as EventListener);
+  }, []);
+
   const selectedPart = useMemo(
-    () => parts.find((p) => p.id === selectedId) ?? null,
-    [parts, selectedId]
+    () => localParts.find((p) => p.id === selectedId) ?? null,
+    [localParts, selectedId]
   );
 
   return (
@@ -43,31 +74,38 @@ export default function BikeClient({
         </div>
       </header>
 
-      {diagram.viewer === "three" ? (
-        <Bike3DCanvas
-          modelUrl={diagram.modelUrl}
-          parts={parts}
-          selectedPartId={selectedId}
-          onSelectPart={(id) => setSelectedId(id)}
-        />
-      ) : (
-        <BikeCanvas
-          diagram={diagram}
-          hotspots={hotspots}
-          selectedPartId={selectedId}
-          onSelectPart={(id) => setSelectedId(id)}
-        />
-      )}
+      <Suspense fallback={<CanvasLoading />}>
+        {diagram.viewer === "three" ? (
+          <Bike3DCanvas
+            modelUrl={diagram.modelUrl}
+            parts={localParts}
+            selectedPartId={selectedId}
+            onSelectPart={(id) => {
+              // select part but do not auto-open the Index overlay
+              setSelectedId(id);
+            }}
+          />
+        ) : (
+          <BikeCanvas
+            diagram={diagram}
+            hotspots={hotspots}
+            selectedPartId={selectedId}
+            onSelectPart={(id) => {
+              // select part but do not auto-open the Index overlay
+              setSelectedId(id);
+            }}
+          />
+        )}
+      </Suspense>
 
-      <PartDrawer
-        part={selectedPart}
-        onClose={() => setSelectedId(null)}
-      />
+      <PartDrawer part={selectedPart} onClose={() => setSelectedId(null)} />
 
       <div
         className={[
           "fixed inset-0 z-50 bg-[#f2f2f2]/95 backdrop-blur transition-opacity",
-          indexOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          indexOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none",
         ].join(" ")}
         role="dialog"
         aria-modal="true"
@@ -98,7 +136,7 @@ export default function BikeClient({
             Parts List
           </div>
           <div className="mt-3 max-h-[70vh] space-y-3 overflow-y-auto pr-2 text-base text-black/80">
-            {parts.map((part, index) => {
+            {localParts.map((part, index) => {
               const selected = selectedId === part.id;
               return (
                 <div
@@ -112,7 +150,9 @@ export default function BikeClient({
                     }}
                     className={[
                       "text-left transition",
-                      selected ? "text-black font-semibold" : "text-black/80 hover:text-black"
+                      selected
+                        ? "text-black font-semibold"
+                        : "text-black/80 hover:text-black",
                     ].join(" ")}
                   >
                     <span className="mr-2 text-black/40">{index + 1}.</span>

@@ -10,9 +10,9 @@ import {
   MeshStandardMaterial,
   Object3D,
   Quaternion,
-  Vector3
+  Vector3,
 } from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 
 type PartKey =
   | "front"
@@ -38,12 +38,12 @@ const partRules: Array<{ key: PartKey; keywords: string[] }> = [
       "switch",
       "damper",
       "steering",
-      "mirror"
-    ]
+      "mirror",
+    ],
   },
   {
     key: "front",
-    keywords: ["front", "fork", "caliper", "disc", "axle", "tow", "lug"]
+    keywords: ["front", "fork", "caliper", "disc", "axle", "tow", "lug"],
   },
   {
     key: "rear",
@@ -54,21 +54,21 @@ const partRules: Array<{ key: PartKey; keywords: string[] }> = [
       "mudguard",
       "swing",
       "disc",
-      "axle"
-    ]
+      "axle",
+    ],
   },
   { key: "radiator", keywords: ["radiator", "hose"] },
   { key: "tank", keywords: ["tank", "fuel", "gas", "vent", "cap"] },
   {
     key: "engine",
-    keywords: ["clutch", "water pump", "oil", "ecu", "map", "filter"]
+    keywords: ["clutch", "water pump", "oil", "ecu", "map", "filter"],
   },
   { key: "signals", keywords: ["signal", "light", "gopro", "tail"] },
   { key: "seat", keywords: ["seat"] },
   {
     key: "frame",
-    keywords: ["frame", "guard", "bash", "peg", "triple clamp"]
-  }
+    keywords: ["frame", "guard", "bash", "peg", "triple clamp"],
+  },
 ];
 
 function normalize(text: string) {
@@ -185,7 +185,7 @@ function BikeModel({
   selectedMeshUuid,
   onMeshSelected,
   onMeshPartMapped,
-  selectedPartMeshUuid
+  selectedPartMeshUuid,
 }: {
   modelUrl: string;
   parts: Part[];
@@ -197,7 +197,7 @@ function BikeModel({
   onMeshPartMapped: (partId: string, meshUuid: string) => void;
   selectedPartMeshUuid: string | null;
 }) {
-  const gltf = useLoader(GLTFLoader, modelUrl);
+  const gltf = useLoader(GLTFLoader, modelUrl) as GLTF;
 
   const scene = useMemo(() => {
     const cloned = gltf.scene.clone(true);
@@ -270,7 +270,7 @@ function BikeModel({
       frame: [],
       seat: [],
       signals: [],
-      radiator: []
+      radiator: [],
     };
     parts.forEach((part) => {
       map[partKeyFromName(part.name)].push(part.id);
@@ -279,7 +279,6 @@ function BikeModel({
   }, [parts]);
 
   useEffect(() => {
-    const highlight = new Color("#f97316");
     const shouldHighlightByKey = Boolean(selectedKey && !selectedMeshUuid);
     const targetMeshUuid = selectedPartMeshUuid ?? selectedMeshUuid;
 
@@ -369,35 +368,82 @@ function BikeModel({
     });
   }, [scene, selectedKey, selectedMeshUuid, selectedPartMeshUuid]);
 
+  // Conservative one-time mapping: group meshes by heuristic key and assign parts
+  // to candidate meshes by index within each group. This populates an initial
+  // parts->mesh association so the UI can highlight parts without manual mapping.
+  useEffect(() => {
+    if (!scene || parts.length === 0) return;
+
+    const meshGroups: Record<string, Mesh[]> = {};
+    scene.traverse((obj) => {
+      if ((obj as Mesh).isMesh) {
+        const mesh = obj as Mesh;
+        const k = keyFromMesh(mesh);
+        meshGroups[k] = meshGroups[k] || [];
+        meshGroups[k].push(mesh);
+      }
+    });
+
+    const partsByKeyLocal: Record<PartKey, string[]> = {
+      front: [],
+      rear: [],
+      handlebar: [],
+      engine: [],
+      exhaust: [],
+      tank: [],
+      frame: [],
+      seat: [],
+      signals: [],
+      radiator: [],
+    };
+    parts.forEach((part) => {
+      partsByKeyLocal[partKeyFromName(part.name)].push(part.id);
+    });
+
+    (Object.keys(partsByKeyLocal) as PartKey[]).forEach((k) => {
+      const partIds = partsByKeyLocal[k];
+      const meshes = meshGroups[k] ?? [];
+      if (partIds.length === 0 || meshes.length === 0) return;
+      for (let i = 0; i < partIds.length; i++) {
+        const partId = partIds[i];
+        const mesh = meshes[i] ?? meshes[meshes.length - 1];
+        if (mesh) onMeshPartMapped(partId, mesh.uuid);
+      }
+    });
+  }, [scene, parts, onMeshPartMapped]);
+
   return (
     <group rotation={[0, rotationY, 0]}>
       <group
         scale={scale}
         position={[-center.x * scale, -center.y * scale, -center.z * scale]}
-          onPointerDown={(e) => {
-            e.stopPropagation();
-            const mesh = findMesh(e.object as Object3D);
-            if (!mesh) return;
-            onMeshSelected(mesh.uuid);
-            const key = keyFromMesh(mesh);
-            const match = partsByKey[key][0] ?? parts[0]?.id;
-            if (match) {
-              onMeshPartMapped(match, mesh.uuid);
-              onSelectPart(match);
-            }
-          }}
-        >
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          const mesh = findMesh(e.object as Object3D);
+          if (!mesh) return;
+          onMeshSelected(mesh.uuid);
+          const key = keyFromMesh(mesh);
+          const match = partsByKey[key][0] ?? parts[0]?.id;
+          if (match) {
+            // map the clicked mesh to the best candidate part, but do not auto-open the Index
+            onMeshPartMapped(match, mesh.uuid);
+            // intentionally do not call onSelectPart here to avoid forcing the Index overlay open
+          }
+        }}
+      >
         <primitive object={scene} />
       </group>
     </group>
   );
 }
 
+
+
 export function Bike3DCanvas({
   modelUrl,
   parts,
   selectedPartId,
-  onSelectPart
+  onSelectPart,
 }: {
   modelUrl?: string;
   parts: Part[];
@@ -455,7 +501,7 @@ export function Bike3DCanvas({
           rotationY={rotationY}
           selectedMeshUuid={selectedMesh}
           selectedPartMeshUuid={
-            selectedPartId ? partMeshMap[selectedPartId] ?? null : null
+            selectedPartId ? (partMeshMap[selectedPartId] ?? null) : null
           }
           onMeshSelected={(meshUuid) => {
             setSelectedMesh(meshUuid);

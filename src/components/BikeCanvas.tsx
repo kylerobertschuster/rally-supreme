@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { OptimizedImage } from "@/lib/imageOptimization";
 import type { Diagram, Hotspot } from "@/lib/types";
 
 type Vec = { x: number; y: number };
@@ -13,7 +14,7 @@ export function BikeCanvas({
   diagram,
   hotspots,
   selectedPartId,
-  onSelectPart
+  onSelectPart,
 }: {
   diagram: Diagram;
   hotspots: Hotspot[];
@@ -28,9 +29,10 @@ export function BikeCanvas({
 
   const frames = useMemo(() => {
     if (!diagram.framePath || !diagram.frameCount) return [];
+    const framePath = diagram.framePath;
     return Array.from({ length: diagram.frameCount }, (_, i) => {
       const index = i + 1;
-      return diagram.framePath
+      return framePath
         .replace("%04d", String(index).padStart(4, "0"))
         .replace("%d", String(index));
     });
@@ -81,13 +83,14 @@ export function BikeCanvas({
     setScale(startScale);
     setOffset({
       x: (cw - imgSize.w * startScale) / 2,
-      y: (ch - imgSize.h * startScale) / 2
+      y: (ch - imgSize.h * startScale) / 2,
     });
   }, [imgSize]);
 
-  useEffect(() => {
-    setFrameIndex(0);
-  }, [diagram.framePath, diagram.frameCount]);
+  // When the diagram changes we want the component to reset state;
+  // using a `key` on the root element below ensures React remounts
+  // this component when `diagram.framePath` or `diagram.frameCount`
+  // change, avoiding synchronous setState inside an effect.
 
   function onPointerDown(e: React.PointerEvent) {
     if (!hasFrames) return;
@@ -121,12 +124,19 @@ export function BikeCanvas({
   const imageSrc = hasFrames ? frames[frameIndex] : diagram.image;
 
   return (
-    <div className="w-full h-[78vh] overflow-hidden border-b border-black/10 bg-[#e6e6e6]">
+    <div
+      key={`${diagram.framePath ?? diagram.image}-${diagram.frameCount ?? 0}`}
+      className="w-full h-[78vh] overflow-hidden border-b border-black/10 bg-[#e6e6e6]"
+    >
       <div
         ref={containerRef}
         className={[
           "w-full h-full relative select-none",
-          hasFrames ? (dragging ? "cursor-grabbing" : "cursor-grab") : "cursor-default"
+          hasFrames
+            ? dragging
+              ? "cursor-grabbing"
+              : "cursor-grab"
+            : "cursor-default",
         ].join(" ")}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -139,23 +149,21 @@ export function BikeCanvas({
           className="absolute top-0 left-0"
           style={{
             transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
-            transformOrigin: "top left"
+            transformOrigin: "top left",
           }}
         >
           {/* IMAGE */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           {imageSrc ? (
-            <img
+            <OptimizedImage
               src={imageSrc}
               alt={diagram.label}
-              draggable={false}
-              onLoad={(e) => {
-                const img = e.currentTarget;
-                setImgSize({ w: img.naturalWidth, h: img.naturalHeight });
+              width={diagram.width ?? 1200}
+              height={diagram.height ?? 800}
+              priority={false}
+              onLoadingComplete={(result) => {
+                setImgSize({ w: result.naturalWidth, h: result.naturalHeight });
               }}
-              style={{
-                display: "block"
-              }}
+              style={{ display: "block" }}
             />
           ) : null}
 
@@ -176,13 +184,13 @@ export function BikeCanvas({
                       "absolute rounded-md border transition",
                       selected
                         ? "border-black bg-black/20"
-                        : "border-black/30 bg-black/10 hover:bg-black/20"
+                        : "border-black/30 bg-black/10 hover:bg-black/20",
                     ].join(" ")}
                     style={{
                       left: hs.px.x,
                       top: hs.px.y,
                       width: hs.px.w,
-                      height: hs.px.h
+                      height: hs.px.h,
                     }}
                     title={hs.partId}
                     aria-label={`select part ${hs.partId}`}

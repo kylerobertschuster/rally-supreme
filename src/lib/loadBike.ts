@@ -1,23 +1,53 @@
 import fs from "fs";
 import path from "path";
+import type { Bike, Diagram, Hotspot, Part } from "./types";
+
+export class BikeNotFoundError extends Error {
+  constructor(slug: string) {
+    super(`Bike "${slug}" not found`);
+    this.name = "BikeNotFoundError";
+  }
+}
 
 export function loadBike(slug: string) {
   const base = path.join(process.cwd(), "data/bikes", slug);
 
-  const read = (p: string) =>
-    JSON.parse(fs.readFileSync(path.join(base, p), "utf-8"));
-  const readOptional = <T>(p: string, fallback: T) => {
+  // Validate bike directory exists
+  if (!fs.existsSync(base)) {
+    throw new BikeNotFoundError(slug);
+  }
+
+  const read = (p: string) => {
+    const filePath = path.join(base, p);
     try {
-      return read(p) as T;
-    } catch {
+      return JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    } catch (error) {
+      throw new Error(
+        `Failed to read ${p} for bike "${slug}": ${error instanceof Error ? error.message : "Unknown error"}`
+      );
+    }
+  };
+
+  const readOptional = <T>(p: string, fallback: T): T => {
+    const filePath = path.join(base, p);
+    if (!fs.existsSync(filePath)) {
+      return fallback;
+    }
+    try {
+      return JSON.parse(fs.readFileSync(filePath, "utf-8")) as T;
+    } catch (error) {
+      console.warn(
+        `Warning: Failed to read ${p} for bike "${slug}", using fallback:`,
+        error
+      );
       return fallback;
     }
   };
 
   return {
-    bike: readOptional("bike.json", { id: slug, name: slug }),
-    diagram: read("diagram.json"),
-    parts: readOptional("parts.json", []),
-    hotspots: readOptional("hotspots.json", [])
+    bike: readOptional<Bike>("bike.json", { id: slug, name: slug }),
+    diagram: read("diagram.json") as Diagram,
+    parts: readOptional<Part[]>("parts.json", []),
+    hotspots: readOptional<Hotspot[]>("hotspots.json", []),
   };
 }

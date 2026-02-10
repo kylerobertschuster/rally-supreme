@@ -25,6 +25,18 @@ export type Part = {
   tags?: string[];
   notes?: string;
   links?: { label: string; url: string }[];
+  alternatives?: Array<{
+    id: string;
+    name: string;
+    partNumber?: string;
+    links?: { label: string; url: string }[];
+  }>;
+  replacement?: {
+    id: string;
+    name: string;
+    partNumber?: string;
+    links?: { label: string; url: string }[];
+  } | null;
 };
 
 export type Hotspot = {
