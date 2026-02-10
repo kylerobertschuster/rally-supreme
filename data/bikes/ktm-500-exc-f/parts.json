@@ -1,32 +1,250 @@
 [
   {
-    "id": "front-wheel",
-    "name": "Front Wheel Assembly",
-    "partNumber": "KTM-21-EXC-F-001",
-    "tags": ["chassis", "rolling"],
-    "notes": "Lightweight 21-inch wheel with off-road tire and disc hub.",
-    "links": [
-      { "label": "OEM spec sheet", "url": "https://www.ktm.com" }
-    ]
+    "id": "fmf-4-14-titanium-exhaust-system",
+    "name": "FMF 4.14 titanium exhaust system"
   },
   {
-    "id": "front-fork",
-    "name": "Front Fork",
-    "partNumber": "KTM-48-WP-002",
-    "tags": ["suspension"],
-    "notes": "WP XPLOR 48 fork tuned for enduro terrain.",
-    "links": [
-      { "label": "Suspension guide", "url": "https://www.wp-suspension.com" }
-    ]
+    "id": "get-ecu-wifi-module",
+    "name": "GET ECU with Wi-Fi module"
   },
   {
-    "id": "brake-caliper",
-    "name": "Front Brake Caliper",
-    "partNumber": "KTM-BREMBO-003",
-    "tags": ["brakes"],
-    "notes": "High-performance caliper with braided line routing.",
-    "links": [
-      { "label": "Brembo overview", "url": "https://www.brembo.com" }
-    ]
+    "id": "get-map-selector-switch",
+    "name": "GET map selector switch"
+  },
+  {
+    "id": "moto-minded-left-hand-4-button-switch",
+    "name": "Moto Minded left-hand 4-button billet aluminum switch"
+  },
+  {
+    "id": "moto-minded-right-hand-start-stop-switch",
+    "name": "Moto Minded right-hand start/stop aluminum two-button switch"
+  },
+  {
+    "id": "ox-racing-left-hand-hydraulic-rear-brake-kit",
+    "name": "OX Racing left-hand hydraulic rear brake kit"
+  },
+  {
+    "id": "renthal-fat-32-handlebars",
+    "name": "Renthal Fat 32-inch wide handlebars"
+  },
+  {
+    "id": "brp-handlebar-damping-system",
+    "name": "BRP handlebar damping system",
+    "notes": "Blue color, soft dampeners."
+  },
+  {
+    "id": "scotts-performance-steering-damper",
+    "name": "Scotts Performance steering damper"
+  },
+  {
+    "id": "scotts-performance-big-knob-adjuster",
+    "name": "Scotts Performance big knob adjuster"
+  },
+  {
+    "id": "clean-speed-scotts-damper-cable-guide",
+    "name": "Clean Speed Scotts damper cable guide"
+  },
+  {
+    "id": "brp-25mm-handlebar-riser-adapters",
+    "name": "BRP 25 mm handlebar riser adapters"
+  },
+  {
+    "id": "ktm-six-days-billet-triple-clamp",
+    "name": "KTM Six Days billet aluminum reinforced triple clamp"
+  },
+  {
+    "id": "molecule-motorsports-hand-guards",
+    "name": "Molecule Motorsports hand guards"
+  },
+  {
+    "id": "cnc-billet-aluminum-throttle-housing",
+    "name": "CNC billet aluminum throttle housing"
+  },
+  {
+    "id": "odi-medium-compound-gray-grips",
+    "name": "ODI medium compound gray grips"
+  },
+  {
+    "id": "asv-c3-shorty-lever-set",
+    "name": "ASV C3 shorty lever set"
+  },
+  {
+    "id": "odi-soft-donuts",
+    "name": "ODI soft donuts"
+  },
+  {
+    "id": "spiegler-steel-braided-lines-orange-liners",
+    "name": "Spiegler USA custom steel braided lines",
+    "notes": "Orange liners."
+  },
+  {
+    "id": "two-inch-handlebar-mirrors",
+    "name": "2-inch handlebar mirrors"
+  },
+  {
+    "id": "acerbis-3-8-gallon-fuel-tank",
+    "name": "Acerbis 3.8-gallon natural fuel tank"
+  },
+  {
+    "id": "hunt-racing-twist-on-gas-cap",
+    "name": "Hunt Racing twist-on gas cap"
+  },
+  {
+    "id": "hunt-racing-vent-valve",
+    "name": "Hunt Racing vent valve"
+  },
+  {
+    "id": "taco-moto-cable-fork-guides",
+    "name": "Taco Moto cable fork guides"
+  },
+  {
+    "id": "taco-moto-hidden-kill-switch",
+    "name": "Taco Moto hidden kill switch"
+  },
+  {
+    "id": "taco-moto-relocation-switch-adapter",
+    "name": "Taco Moto relocation switch adapter"
+  },
+  {
+    "id": "moose-heavy-duty-radiator-guards",
+    "name": "Moose heavy duty radiator guards"
+  },
+  {
+    "id": "model-gadget-micro-turn-signals",
+    "name": "Model Gadget micro turn signals"
+  },
+  {
+    "id": "new-rage-cycles-fork-turn-led-signals",
+    "name": "New Rage Cycles fork turn LED signals"
+  },
+  {
+    "id": "p3-racing-carbon-fiber-fork-guards",
+    "name": "P3 Racing carbon fiber fork guards"
+  },
+  {
+    "id": "bulletproof-billet-fork-lug-guards",
+    "name": "Bulletproof billet fork lug guards"
+  },
+  {
+    "id": "str-front-disc-bash-guard",
+    "name": "STR front disc bash guard"
+  },
+  {
+    "id": "titanium-front-axle-bolt",
+    "name": "Titanium front axle bolt"
+  },
+  {
+    "id": "acerbis-front-tow-strap",
+    "name": "Acerbis front tow strap"
+  },
+  {
+    "id": "gopro-camera-remote-control",
+    "name": "GoPro camera remote control"
+  },
+  {
+    "id": "p3-racing-carbon-fiber-header-guard",
+    "name": "P3 Racing carbon fiber header guard"
+  },
+  {
+    "id": "samco-blue-silicone-radiator-hoses",
+    "name": "Samco blue silicone radiator hoses"
+  },
+  {
+    "id": "gold-reflective-heat-shields",
+    "name": "Gold reflective heat shields",
+    "notes": "For hoses and the bottom of the fuel tank."
+  },
+  {
+    "id": "molecule-bash-guard",
+    "name": "Molecule bash guard"
+  },
+  {
+    "id": "fastway-billet-foot-pegs",
+    "name": "Fastway billet foot pegs"
+  },
+  {
+    "id": "p3-racing-carbon-fiber-frame-guards",
+    "name": "P3 Racing carbon fiber frame guards"
+  },
+  {
+    "id": "steg-pegs-two-pucks",
+    "name": "Steg pegs with two pucks"
+  },
+  {
+    "id": "moto-tecnica-tail-light-plate-holder",
+    "name": "Moto Tecnica tail light with plate holder"
+  },
+  {
+    "id": "dirt-tricks-51-tooth-sprocket",
+    "name": "Dirt Tricks 51-tooth sprocket"
+  },
+  {
+    "id": "rekluse-racing-clutch-kit",
+    "name": "Rekluse Racing clutch kit"
+  },
+  {
+    "id": "boyesen-racing-water-pump-magnesium-cover",
+    "name": "Boyesen Racing water pump/magnesium cover"
+  },
+  {
+    "id": "racetech-blue-titanium-foot-peg-pins",
+    "name": "Race Tech blue titanium foot peg pins"
+  },
+  {
+    "id": "acerbis-swing-arm-guard",
+    "name": "Acerbis swing arm guard"
+  },
+  {
+    "id": "str-rear-disc-guard",
+    "name": "STR rear disc guard"
+  },
+  {
+    "id": "racetech-rear-titanium-axle-nut",
+    "name": "Race Tech rear titanium axle nut"
+  },
+  {
+    "id": "bulletproof-chain-tensioners-titanium-adjusters",
+    "name": "Bulletproof chain tensioners",
+    "notes": "Titanium adjuster screws."
+  },
+  {
+    "id": "p3-racing-carbon-fiber-rear-mudguard",
+    "name": "P3 Racing carbon fiber rear mudguard"
+  },
+  {
+    "id": "mitas-super-light-tires-set",
+    "name": "Mitas Super Light tires set"
+  },
+  {
+    "id": "ktm-six-days-wheel-set",
+    "name": "KTM Six Days wheel set"
+  },
+  {
+    "id": "str-orange-billet-caliper-hanger",
+    "name": "STR orange billet aluminum caliper hanger"
+  },
+  {
+    "id": "tm-design-chain-guard",
+    "name": "TM Design chain guard"
+  },
+  {
+    "id": "tm-design-chain-guide",
+    "name": "TM Design chain guide"
+  },
+  {
+    "id": "dirt-tricks-countershaft-sprocket-spacer",
+    "name": "Dirt Tricks countershaft sprocket spacer"
+  },
+  {
+    "id": "cnc-side-stand-grip-peg",
+    "name": "CNC side stand grip peg"
+  },
+  {
+    "id": "cmt-carbon-front-sprocket-guard",
+    "name": "CMT carbon front sprocket guard"
+  },
+  {
+    "id": "taco-moto-billet-aluminum-oil-filter-cover",
+    "name": "Taco Moto billet aluminum orange oil filter cover"
   }
 ]

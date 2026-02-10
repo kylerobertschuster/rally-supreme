@@ -12,34 +12,34 @@ export function PartDrawer({
   return (
     <div
       className={[
-        "fixed top-0 right-0 h-full w-full sm:w-[420px] bg-black/90 text-white",
-        "backdrop-blur border-l border-white/10 shadow-2xl",
+        "fixed top-0 right-0 h-full w-full sm:w-[420px] bg-white text-black",
+        "backdrop-blur border-l border-black/10 shadow-2xl",
         "transition-transform duration-200",
         part ? "translate-x-0" : "translate-x-full"
       ].join(" ")}
       role="dialog"
       aria-modal="true"
     >
-      <div className="p-4 flex items-center justify-between border-b border-white/10">
-        <div className="font-semibold tracking-tight">PART DETAILS</div>
+      <div className="p-4 flex items-center justify-between border-b border-black/10">
+        <div className="font-semibold tracking-tight">Part Details</div>
         <button
           onClick={onClose}
-          className="px-3 py-1 rounded-md bg-white/10 hover:bg-white/20"
+          className="px-3 py-1 rounded-md border border-black/20 text-xs uppercase tracking-[0.2em] hover:border-black/40"
         >
-          CLOSE
+          Close
         </button>
       </div>
 
       <div className="p-4 space-y-3">
         {!part ? (
-          <div className="text-white/70">NO PART SELECTED.</div>
+          <div className="text-black/50">No part selected.</div>
         ) : (
           <>
-            <div className="text-xl font-bold leading-tight">{part.name}</div>
+            <div className="text-xl font-semibold leading-tight">{part.name}</div>
 
             {part.partNumber && (
-              <div className="text-white/70">
-                PART #: <span className="text-white">{part.partNumber}</span>
+              <div className="text-black/60">
+                Part #: <span className="text-black">{part.partNumber}</span>
               </div>
             )}
 
@@ -48,7 +48,7 @@ export function PartDrawer({
                 {part.tags.map((t) => (
                   <span
                     key={t}
-                    className="text-xs px-2 py-1 rounded-full bg-white/10 border border-white/10"
+                    className="text-xs px-2 py-1 rounded-full bg-black/5 border border-black/10"
                   >
                     {t.toUpperCase()}
                   </span>
@@ -57,19 +57,19 @@ export function PartDrawer({
             ) : null}
 
             {part.notes && (
-              <div className="text-white/80 leading-relaxed">{part.notes}</div>
+              <div className="text-black/70 leading-relaxed">{part.notes}</div>
             )}
 
             {part.links?.length ? (
               <div className="pt-2 space-y-2">
-                <div className="text-sm font-semibold text-white/80">LINKS</div>
+                <div className="text-sm font-semibold text-black/60">Links</div>
                 {part.links.map((l) => (
                   <a
                     key={l.url}
                     href={l.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="block text-sm underline text-white/90 hover:text-white"
+                    className="block text-sm underline text-black/80 hover:text-black"
                   >
                     {l.label}
                   </a>

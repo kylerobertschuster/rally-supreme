@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { Bike, Diagram, Hotspot, Part } from "@/lib/types";
 import { BikeCanvas } from "@/components/BikeCanvas";
+import { Bike3DCanvas } from "@/components/Bike3DCanvas";
 import { PartDrawer } from "@/components/PartDrawer";
 
 export default function BikeClient({
@@ -16,9 +17,8 @@ export default function BikeClient({
   parts: Part[];
   hotspots: Hotspot[];
 }) {
-  const [selectedId, setSelectedId] = useState<string | null>(
-    parts[0]?.id ?? null
-  );
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [indexOpen, setIndexOpen] = useState(false);
 
   const selectedPart = useMemo(
     () => parts.find((p) => p.id === selectedId) ?? null,
@@ -26,125 +26,122 @@ export default function BikeClient({
   );
 
   return (
-    <div className="relative space-y-6">
-      <header className="rounded-3xl border border-black/10 bg-[radial-gradient(circle_at_10%_20%,#f59e0b,transparent_45%),radial-gradient(circle_at_90%_10%,#f97316,transparent_35%),linear-gradient(135deg,#0a0a0a,#1f1f1f_55%,#111827)] text-white p-6 md:p-8 shadow-2xl">
-        <div className="text-sm uppercase tracking-[0.3em] text-white/70">
-          Exploded Parts Canvas
-        </div>
-        <div className="mt-2 text-3xl md:text-4xl font-semibold tracking-tight">
+    <div className="relative min-h-screen bg-[#e6e6e6] text-black">
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-black/10 bg-[#e6e6e6]/95 px-4 py-3 backdrop-blur">
+        <div className="text-sm uppercase tracking-[0.3em] text-black/60">
+          {bike.year ? `${bike.year} ` : ""}
           {bike.name}
         </div>
-        <div className="mt-1 text-white/80">
-          {bike.year ? `${bike.year} • ` : ""}
-          {bike.manufacturer ?? "Manufacturer"}
-        </div>
-        <div className="mt-4 text-white/80 max-w-2xl">
-          Zoom, pan, and tap a component to reveal part details. This view
-          turns a complex diagram into an interactive catalog.
-        </div>
-        <div className="mt-5 flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em]">
-          <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1">
-            Interactive Diagram
-          </span>
-          <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1">
-            Fast Part Lookup
-          </span>
-          <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1">
-            Dealer Ready
-          </span>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            className="rounded-full border border-black/20 px-4 py-2 text-xs uppercase tracking-[0.2em] text-black/70 hover:border-black/40"
+            onClick={() => setIndexOpen(true)}
+          >
+            Index
+          </button>
         </div>
       </header>
 
-      <BikeCanvas
-        diagram={diagram}
-        hotspots={hotspots}
-        onSelectPart={(id) => setSelectedId(id)}
-      />
-
-      <section className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-black/10 bg-white p-4 shadow-lg">
-          <div className="text-xs uppercase tracking-[0.2em] text-black/50">
-            Parts Loaded
-          </div>
-          <div className="mt-2 text-2xl font-semibold">{parts.length}</div>
-          <div className="mt-1 text-black/60">
-            Curated components ready for fast lookup.
-          </div>
-        </div>
-        <div className="rounded-2xl border border-black/10 bg-white p-4 shadow-lg">
-          <div className="text-xs uppercase tracking-[0.2em] text-black/50">
-            Hotspots
-          </div>
-          <div className="mt-2 text-2xl font-semibold">{hotspots.length}</div>
-          <div className="mt-1 text-black/60">
-            Clickable zones mapped to real parts.
-          </div>
-        </div>
-        <div className="rounded-2xl border border-black/10 bg-white p-4 shadow-lg">
-          <div className="text-xs uppercase tracking-[0.2em] text-black/50">
-            Source
-          </div>
-          <div className="mt-2 text-2xl font-semibold">OEM</div>
-          <div className="mt-1 text-black/60">
-            Structured to align with catalog data.
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-black/10 bg-white p-6 shadow-xl">
-        <div className="text-xs uppercase tracking-[0.2em] text-black/50">
-          Parts Overview
-        </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          {parts.map((part) => (
-            <button
-              key={part.id}
-              onClick={() => setSelectedId(part.id)}
-              className={[
-                "rounded-2xl border border-black/10 p-4 text-left transition",
-                "hover:border-black/30 hover:shadow-md",
-                selectedId === part.id
-                  ? "bg-black text-white"
-                  : "bg-white"
-              ].join(" ")}
-            >
-              <div className="text-sm uppercase tracking-[0.2em] text-black/40">
-                {part.partNumber ?? "PART"}
-              </div>
-              <div
-                className={[
-                  "mt-2 text-lg font-semibold",
-                  selectedId === part.id ? "text-white" : "text-black"
-                ].join(" ")}
-              >
-                {part.name}
-              </div>
-              {part.tags?.length ? (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {part.tags.map((t) => (
-                    <span
-                      key={t}
-                      className={[
-                        "text-xs px-2 py-1 rounded-full border",
-                        selectedId === part.id
-                          ? "border-white/30 text-white/90"
-                          : "border-black/10 text-black/60"
-                      ].join(" ")}
-                    >
-                      {t.toUpperCase()}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-            </button>
-          ))}
-        </div>
-      </section>
+      {diagram.viewer === "three" ? (
+        <Bike3DCanvas
+          modelUrl={diagram.modelUrl}
+          parts={parts}
+          selectedPartId={selectedId}
+          onSelectPart={(id) => setSelectedId(id)}
+        />
+      ) : (
+        <BikeCanvas
+          diagram={diagram}
+          hotspots={hotspots}
+          selectedPartId={selectedId}
+          onSelectPart={(id) => setSelectedId(id)}
+        />
+      )}
 
       <PartDrawer
         part={selectedPart}
         onClose={() => setSelectedId(null)}
       />
+
+      <div
+        className={[
+          "fixed inset-0 z-50 bg-[#f2f2f2]/95 backdrop-blur transition-opacity",
+          indexOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        ].join(" ")}
+        role="dialog"
+        aria-modal="true"
+      >
+        <div className="mx-auto max-w-3xl px-6 py-10">
+          <div className="flex items-center justify-between">
+            <div className="text-xs uppercase tracking-[0.3em] text-black/60">
+              Index
+            </div>
+            <button
+              type="button"
+              className="rounded-full border border-black/20 px-4 py-2 text-xs uppercase tracking-[0.2em] text-black/70 hover:border-black/40"
+              onClick={() => setIndexOpen(false)}
+            >
+              Close
+            </button>
+          </div>
+
+          <div className="mt-6 text-3xl font-semibold tracking-tight">
+            {bike.name}
+          </div>
+          <div className="mt-1 text-black/60">
+            {bike.year ? `${bike.year} • ` : ""}
+            {bike.manufacturer ?? "Manufacturer"}
+          </div>
+
+          <div className="mt-6 text-sm uppercase tracking-[0.2em] text-black/50">
+            Parts List
+          </div>
+          <div className="mt-3 max-h-[70vh] space-y-3 overflow-y-auto pr-2 text-base text-black/80">
+            {parts.map((part, index) => {
+              const selected = selectedId === part.id;
+              return (
+                <div
+                  key={part.id}
+                  className="flex items-start justify-between gap-4 border-b border-black/10 pb-2"
+                >
+                  <button
+                    onClick={() => {
+                      setSelectedId(part.id);
+                      setIndexOpen(false);
+                    }}
+                    className={[
+                      "text-left transition",
+                      selected ? "text-black font-semibold" : "text-black/80 hover:text-black"
+                    ].join(" ")}
+                  >
+                    <span className="mr-2 text-black/40">{index + 1}.</span>
+                    {part.name}
+                  </button>
+
+                  {part.links?.length ? (
+                    <div className="flex flex-col items-end gap-1 text-sm">
+                      {part.links.map((link) => (
+                        <a
+                          key={link.url}
+                          href={link.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline text-black/70 hover:text-black"
+                        >
+                          {link.label}
+                        </a>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-black/40">Link pending</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

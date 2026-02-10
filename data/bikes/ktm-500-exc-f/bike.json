@@ -3,5 +3,5 @@
   "name": "KTM 500 EXC-F",
   "year": "2025",
   "manufacturer": "KTM",
-  "views": ["exploded"]
+  "views": ["spin", "exploded"]
 }
