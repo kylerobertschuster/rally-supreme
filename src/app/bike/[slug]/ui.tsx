@@ -160,7 +160,7 @@ export default function BikeClient({
 
             {/* Bike List at top, same format as sidebar */}
             <div className="p-4 border-b border-black/10 overflow-y-auto max-h-[180px]">
-              <div className="text-xs uppercase tracking-[0.3em] text-black/60 mb-2">Motorcycle Models</div>
+              <div className="text-xs uppercase tracking-[0.3em] text-black/60 mb-2">Assembly Programs</div>
               {allBikes.length > 0 ? (
                 <ul className="space-y-1">
                   {allBikes.map((b) => (
@@ -201,7 +201,7 @@ export default function BikeClient({
                 {bike.year ? `${bike.year} • ` : ""}
                 {bike.manufacturer ?? "Manufacturer"}
               </div>
-              <div className="text-sm uppercase tracking-[0.2em] text-black/50 mb-2">Parts List</div>
+              <div className="text-sm uppercase tracking-[0.2em] text-black/50 mb-2">Controlled Parts Index</div>
               <CategorizedPartsList
                 parts={localParts}
                 selectedId={selectedId}
@@ -239,7 +239,7 @@ export default function BikeClient({
                   {bike.year ? `${bike.year} • ` : ""}
                   {bike.manufacturer ?? "Manufacturer"}
                 </div>
-                <div className="text-sm uppercase tracking-[0.2em] text-black/50 mb-2">Parts List</div>
+                <div className="text-sm uppercase tracking-[0.2em] text-black/50 mb-2">Controlled Parts Index</div>
                 <CategorizedPartsList
                   parts={localParts}
                   selectedId={selectedId}

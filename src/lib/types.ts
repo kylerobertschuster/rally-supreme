@@ -22,6 +22,23 @@ export type Part = {
   id: string;
   name: string;
   partNumber?: string;
+  oemPartNumber?: string;
+  supersedes?: string[];
+  fitmentRules?: string[];
+  inventorySources?: Array<{
+    source: string;
+    stockStatus?: "in_stock" | "low" | "backorder" | "unknown";
+    leadTimeDays?: number;
+    url?: string;
+  }>;
+  confidenceScore?: number;
+  approvalStatus?: "draft" | "review" | "approved" | "deprecated";
+  provenance?: {
+    sourceSystem?: string;
+    importedAt?: string;
+    reviewedBy?: string;
+    notes?: string;
+  };
   tags?: string[];
   notes?: string;
   links?: { label: string; url: string }[];

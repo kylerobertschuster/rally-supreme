@@ -112,6 +112,44 @@ export function PartDrawer({
                 Part #: <span className="text-black">{part.partNumber}</span>
               </div>
             )}
+            {part.oemPartNumber && (
+              <div className="text-black/60">
+                OEM #: <span className="text-black">{part.oemPartNumber}</span>
+              </div>
+            )}
+
+            {part.approvalStatus && (
+              <div className="text-black/60">
+                Approval:{" "}
+                <span className="text-black uppercase tracking-[0.1em]">
+                  {part.approvalStatus}
+                </span>
+              </div>
+            )}
+
+            {typeof part.confidenceScore === "number" && (
+              <div className="text-black/60">
+                Confidence:{" "}
+                <span className="text-black">{Math.round(part.confidenceScore * 100)}%</span>
+              </div>
+            )}
+
+            {part.supersedes?.length ? (
+              <div className="text-black/60">
+                Supersedes: <span className="text-black">{part.supersedes.join(", ")}</span>
+              </div>
+            ) : null}
+
+            {part.fitmentRules?.length ? (
+              <div className="pt-1 space-y-1">
+                <div className="text-sm font-semibold text-black/60">Fitment Rules</div>
+                {part.fitmentRules.map((rule) => (
+                  <div key={rule} className="text-sm text-black/75 leading-relaxed">
+                    {rule}
+                  </div>
+                ))}
+              </div>
+            ) : null}
 
             {part.tags?.length ? (
               <div className="flex flex-wrap gap-2">
@@ -144,6 +182,38 @@ export function PartDrawer({
                     {l.label}
                   </a>
                 ))}
+              </div>
+            ) : null}
+
+            {part.inventorySources?.length ? (
+              <div className="pt-2 space-y-2">
+                <div className="text-sm font-semibold text-black/60">Inventory Sources</div>
+                {part.inventorySources.map((source) => (
+                  <div key={`${source.source}-${source.url ?? "nourl"}`} className="text-sm text-black/75">
+                    <div className="font-medium">{source.source}</div>
+                    <div className="text-black/55">
+                      Status: {source.stockStatus ?? "unknown"}
+                      {typeof source.leadTimeDays === "number"
+                        ? ` • Lead time: ${source.leadTimeDays} days`
+                        : ""}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            {part.provenance ? (
+              <div className="pt-2 space-y-1">
+                <div className="text-sm font-semibold text-black/60">Provenance</div>
+                {part.provenance.sourceSystem ? (
+                  <div className="text-sm text-black/70">Source: {part.provenance.sourceSystem}</div>
+                ) : null}
+                {part.provenance.importedAt ? (
+                  <div className="text-sm text-black/70">Imported: {part.provenance.importedAt}</div>
+                ) : null}
+                {part.provenance.reviewedBy ? (
+                  <div className="text-sm text-black/70">Reviewed By: {part.provenance.reviewedBy}</div>
+                ) : null}
               </div>
             ) : null}
 

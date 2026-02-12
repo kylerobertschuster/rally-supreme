@@ -87,7 +87,7 @@ export function BikeSelectorSidebar({
       >
         <div className="p-4 space-y-4">
           <div className="text-xs uppercase tracking-[0.3em] text-black/60">
-            Motorcycle Models
+              Assembly Programs
           </div>
 
           <div className="space-y-6 max-h-[calc(100vh-120px)] overflow-y-auto pr-2">
