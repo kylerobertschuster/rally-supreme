@@ -7,13 +7,14 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
-    const { bike, diagram, parts, hotspots } = loadBike(slug);
+    const { bike, diagram, parts, hotspots, meshMappings } = loadBike(slug);
 
     return Response.json({
       bike,
       diagram,
       parts,
       hotspots,
+      meshMappings,
     });
   } catch (error) {
     if (error instanceof BikeNotFoundError) {

@@ -16,7 +16,7 @@ function BikeLoading() {
 }
 
 async function BikeContent({ slug }: { slug: string }) {
-  const { bike, diagram, parts, hotspots } = loadBike(slug);
+  const { bike, diagram, parts, hotspots, meshMappings } = loadBike(slug);
 
   return (
     <BikeClient
@@ -24,6 +24,7 @@ async function BikeContent({ slug }: { slug: string }) {
       diagram={diagram}
       parts={parts}
       hotspots={hotspots}
+      meshMappings={meshMappings}
     />
   );
 }

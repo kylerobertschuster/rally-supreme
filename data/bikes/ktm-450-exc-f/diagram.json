@@ -1,0 +1,11 @@
+{
+  "id": "spin",
+  "label": "360 View",
+  "image": "/bikes/ktm-500-exc-f/exploded/base.png",
+  "framePath": "/bikes/ktm-500-exc-f/360/frame-%04d.png",
+  "frameCount": 18,
+  "viewer": "three",
+  "modelUrl": "/models/ktm-450-exc.glb",
+  "width": 1498,
+  "height": 1208
+}

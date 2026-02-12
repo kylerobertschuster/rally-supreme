@@ -2,7 +2,7 @@
 
 import { Canvas, useLoader } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Part } from "@/lib/types";
+import type { MeshPartMappings, Part } from "@/lib/types";
 import {
   Box3,
   Color,
@@ -75,6 +75,21 @@ function normalize(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9\s-]/g, " ");
 }
 
+function toTokens(text: string) {
+  return normalize(text)
+    .split(/\s+/)
+    .filter((token) => token.length > 1);
+}
+
+function hashString(value: string) {
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash << 5) - hash + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
 function partKeyFromName(name: string): PartKey {
   const lowered = normalize(name);
   for (const rule of partRules) {
@@ -94,6 +109,32 @@ function findMesh(obj: Object3D): Mesh | null {
   }
   return null;
 }
+
+function meshLookupNames(mesh: Mesh): string[] {
+  const names = [mesh.name, mesh.parent?.name ?? ""];
+  return names.map((name) => name.trim()).filter(Boolean);
+}
+
+function getExplicitPartIdForMesh(
+  mesh: Mesh,
+  mappings?: MeshPartMappings
+): string | null {
+  const meshNameToPartId = mappings?.meshNameToPartId;
+  if (!meshNameToPartId) return null;
+  for (const name of meshLookupNames(mesh)) {
+    const mapped = meshNameToPartId[name];
+    if (mapped) return mapped;
+  }
+  return null;
+}
+
+type MeshDebugInfo = {
+  meshName: string;
+  parentName: string;
+  meshUuid: string;
+  explicitPartId: string | null;
+  resolvedPartId: string | null;
+};
 
 type MeshZone = "front" | "rear" | "center";
 type MeshHeight = "top" | "mid" | "low";
@@ -186,6 +227,8 @@ function BikeModel({
   onMeshSelected,
   onMeshPartMapped,
   selectedPartMeshUuid,
+  meshMappings,
+  onMeshDebug,
 }: {
   modelUrl: string;
   parts: Part[];
@@ -196,6 +239,8 @@ function BikeModel({
   onMeshSelected: (meshUuid: string | null) => void;
   onMeshPartMapped: (partId: string, meshUuid: string) => void;
   selectedPartMeshUuid: string | null;
+  meshMappings?: MeshPartMappings;
+  onMeshDebug?: (info: MeshDebugInfo) => void;
 }) {
   const gltf = useLoader(GLTFLoader, modelUrl) as GLTF;
 
@@ -276,9 +321,18 @@ function BikeModel({
     return map;
   }, [parts]);
 
+  const explicitMappedPartIds = useMemo(() => {
+    const mapping = meshMappings?.meshNameToPartId;
+    if (!mapping) return new Set<string>();
+    const validPartIds = new Set(parts.map((part) => part.id));
+    return new Set(
+      Object.values(mapping).filter((partId) => validPartIds.has(partId))
+    );
+  }, [meshMappings, parts]);
+
   useEffect(() => {
-    const shouldHighlightByKey = Boolean(selectedKey && !selectedMeshUuid);
-    const targetMeshUuid = selectedPartMeshUuid ?? selectedMeshUuid;
+    const targetMeshUuid = selectedMeshUuid ?? selectedPartMeshUuid;
+    const shouldHighlightByKey = Boolean(selectedKey && !targetMeshUuid);
 
     const centerWorld = new Vector3();
     scene.getWorldPosition(centerWorld);
@@ -365,6 +419,18 @@ function BikeModel({
     });
   }, [scene, selectedKey, selectedMeshUuid, selectedPartMeshUuid]);
 
+  useEffect(() => {
+    if (!scene || !meshMappings?.meshNameToPartId) return;
+
+    const validPartIds = new Set(parts.map((part) => part.id));
+    scene.traverse((obj) => {
+      if (!(obj instanceof Mesh)) return;
+      const partId = getExplicitPartIdForMesh(obj, meshMappings);
+      if (!partId || !validPartIds.has(partId)) return;
+      onMeshPartMapped(partId, obj.uuid);
+    });
+  }, [scene, parts, meshMappings, onMeshPartMapped]);
+
   // Conservative one-time mapping: group meshes by heuristic key and assign parts
   // to candidate meshes by index within each group. This populates an initial
   // parts->mesh association so the UI can highlight parts without manual mapping.
@@ -402,11 +468,12 @@ function BikeModel({
       if (partIds.length === 0 || meshes.length === 0) return;
       for (let i = 0; i < partIds.length; i++) {
         const partId = partIds[i];
+        if (explicitMappedPartIds.has(partId)) continue;
         const mesh = meshes[i] ?? meshes[meshes.length - 1];
         if (mesh) onMeshPartMapped(partId, mesh.uuid);
       }
     });
-  }, [scene, parts, onMeshPartMapped]);
+  }, [scene, parts, onMeshPartMapped, explicitMappedPartIds]);
 
   return (
     <group rotation={[0, rotationY, 0]}>
@@ -418,12 +485,59 @@ function BikeModel({
           const mesh = findMesh(e.object as Object3D);
           if (!mesh) return;
           onMeshSelected(mesh.uuid);
+          const explicitPartId = getExplicitPartIdForMesh(mesh, meshMappings);
+          if (explicitPartId && parts.some((part) => part.id === explicitPartId)) {
+            onMeshPartMapped(explicitPartId, mesh.uuid);
+            onSelectPart(explicitPartId);
+            onMeshDebug?.({
+              meshName: mesh.name || "(unnamed)",
+              parentName: mesh.parent?.name || "(none)",
+              meshUuid: mesh.uuid,
+              explicitPartId,
+              resolvedPartId: explicitPartId,
+            });
+            return;
+          }
+
           const key = keyFromMesh(mesh);
-          const match = partsByKey[key][0] ?? parts[0]?.id;
-          if (match) {
-            // map the clicked mesh to the best candidate part, but do not auto-open the Index
-            onMeshPartMapped(match, mesh.uuid);
-            // intentionally do not call onSelectPart here to avoid forcing the Index overlay open
+          // Score against all parts, with a small bonus for the same heuristic key.
+          const meshTokens = toTokens(mesh.name ?? "");
+          let bestId = partsByKey[key][0] ?? parts[0]?.id;
+          let bestScore = -1;
+
+          for (const part of parts) {
+            const partTokens = new Set(toTokens(`${part.name} ${part.id}`));
+            let score = 0;
+            for (const token of meshTokens) {
+              if (partTokens.has(token)) score += 3;
+            }
+            if (partKeyFromName(part.name) === key) {
+              score += 1;
+            }
+            if (score > bestScore) {
+              bestScore = score;
+              bestId = part.id;
+            }
+          }
+
+          // If mesh name is generic, distribute picks across same-key candidates by mesh UUID.
+          if (bestScore <= 1 && partsByKey[key].length > 0) {
+            const candidates = partsByKey[key];
+            const idx = hashString(mesh.uuid) % candidates.length;
+            bestId = candidates[idx];
+          }
+
+          const matchId = bestId;
+          onMeshDebug?.({
+            meshName: mesh.name || "(unnamed)",
+            parentName: mesh.parent?.name || "(none)",
+            meshUuid: mesh.uuid,
+            explicitPartId,
+            resolvedPartId: matchId ?? null,
+          });
+          if (matchId) {
+            onMeshPartMapped(matchId, mesh.uuid);
+            onSelectPart(matchId);
           }
         }}
       >
@@ -438,17 +552,21 @@ function BikeModel({
 export function Bike3DCanvas({
   modelUrl,
   parts,
+  meshMappings,
   selectedPartId,
   onSelectPart,
 }: {
   modelUrl?: string;
   parts: Part[];
+  meshMappings?: MeshPartMappings;
   selectedPartId: string | null;
   onSelectPart: (partId: string) => void;
 }) {
   const [rotationY, setRotationY] = useState(0);
   const [selectedMesh, setSelectedMesh] = useState<string | null>(null);
   const [partMeshMap, setPartMeshMap] = useState<Record<string, string>>({});
+  const [debugMode, setDebugMode] = useState(false);
+  const [meshDebugInfo, setMeshDebugInfo] = useState<MeshDebugInfo | null>(null);
   const draggingRef = useRef(false);
   const lastXRef = useRef(0);
 
@@ -462,7 +580,7 @@ export function Bike3DCanvas({
 
   return (
     <div
-      className="w-full h-[78vh] border-b border-black/10 bg-[#e6e6e6]"
+      className="relative w-full h-[78vh] border-b border-black/10 bg-[#e6e6e6]"
       onPointerDown={(e) => {
         draggingRef.current = true;
         lastXRef.current = e.clientX;
@@ -505,8 +623,58 @@ export function Bike3DCanvas({
           onMeshPartMapped={(partId, meshUuid) => {
             setPartMeshMap((prev) => ({ ...prev, [partId]: meshUuid }));
           }}
+          onMeshDebug={setMeshDebugInfo}
+          meshMappings={meshMappings}
         />
       </Canvas>
+
+      <button
+        type="button"
+        className={[
+          "absolute right-3 top-3 z-20 rounded-md border px-3 py-1.5 text-[10px] uppercase tracking-[0.2em]",
+          debugMode
+            ? "border-black/60 bg-black text-white"
+            : "border-black/30 bg-white/90 text-black/70",
+        ].join(" ")}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          setDebugMode((prev) => !prev);
+        }}
+      >
+        Debug
+      </button>
+
+      {debugMode ? (
+        <div
+          className="absolute left-3 bottom-3 z-20 max-w-[min(92vw,520px)] rounded-md border border-black/20 bg-white/95 p-3 text-xs text-black shadow-lg"
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          {meshDebugInfo ? (
+            <div className="space-y-1">
+              <div>
+                <span className="font-semibold">Mesh:</span> {meshDebugInfo.meshName}
+              </div>
+              <div>
+                <span className="font-semibold">Parent:</span> {meshDebugInfo.parentName}
+              </div>
+              <div>
+                <span className="font-semibold">UUID:</span> {meshDebugInfo.meshUuid}
+              </div>
+              <div>
+                <span className="font-semibold">Explicit map:</span>{" "}
+                {meshDebugInfo.explicitPartId ?? "(none)"}
+              </div>
+              <div>
+                <span className="font-semibold">Resolved part:</span>{" "}
+                {meshDebugInfo.resolvedPartId ?? "(none)"}
+              </div>
+            </div>
+          ) : (
+            <div>Click any mesh to inspect its name and mapping.</div>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }

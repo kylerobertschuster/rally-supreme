@@ -1,0 +1,13 @@
+[
+  {
+    "id": "aprilia-rsv4-sketchfab-source",
+    "name": "Aprilia RSV4 Exploded View Source",
+    "notes": "Source model reference on Sketchfab. Add a local .glb model URL in diagram.json for full interactive viewing in this app.",
+    "links": [
+      {
+        "label": "Sketchfab Model",
+        "url": "https://sketchfab.com/3d-models/aprilia-rsv4-exploded-view-5270cbc98b8d424da845fe85b19f6799"
+      }
+    ]
+  }
+]

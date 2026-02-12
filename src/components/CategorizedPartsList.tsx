@@ -47,7 +47,12 @@ export function CategorizedPartsList({
             {selectedPart.alternatives.map((alt) => (
               <button
                 key={alt.id}
-                onClick={() => onSelectPart(alt.id)}
+                onClick={() => {
+                  const ev = new CustomEvent("part:replace", {
+                    detail: { originalId: selectedPart.id, alternative: alt },
+                  });
+                  window.dispatchEvent(ev);
+                }}
                 className="w-full text-left transition px-3 py-2 rounded-md text-black/70 hover:text-black hover:bg-black/[0.02] text-sm"
               >
                 <div className="flex items-start justify-between gap-3">

@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import type { Bike, Diagram, Hotspot, Part } from "./types";
+import type { Bike, Diagram, Hotspot, MeshPartMappings, Part } from "./types";
 
 export class BikeNotFoundError extends Error {
   constructor(slug: string) {
@@ -49,5 +49,6 @@ export function loadBike(slug: string) {
     diagram: read("diagram.json") as Diagram,
     parts: readOptional<Part[]>("parts.json", []),
     hotspots: readOptional<Hotspot[]>("hotspots.json", []),
+    meshMappings: readOptional<MeshPartMappings>("mesh-map.json", {}),
   };
 }

@@ -47,3 +47,7 @@ export type Hotspot = {
   w: number;
   h: number;
 };
+
+export type MeshPartMappings = {
+  meshNameToPartId?: Record<string, string>;
+};
