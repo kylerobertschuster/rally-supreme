@@ -1,0 +1,23 @@
+{
+  "name": "rally-supreme",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev":     "vite",
+    "build":   "vite build",
+    "preview": "vite preview",
+
+    "validate:assembly": "node scripts/validate-assembly.js",
+
+    "segment":      "python3 segment_parts.py --slug",
+    "segment:fast": "python3 segment_parts.py --no-rembg --slug",
+    "segment:dry":  "python3 segment_parts.py --dry-run --slug"
+  },
+  "dependencies": {
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

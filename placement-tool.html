@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rally Supreme — Placement Authoring Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & TOKENS ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0d0d0d;
+  --surface:   #141414;
+  --surface2:  #1c1c1c;
+  --surface3:  #242424;
+  --border:    #2c2c2c;
+  --border2:   #383838;
+  --accent:    #e85c2e;
+  --accent-lo: rgba(232,92,46,0.12);
+  --accent-md: rgba(232,92,46,0.30);
+  --gold:      #c8952a;
+  --green:     #3eb97d;
+  --red:       #d94f4f;
+  --text:      #e8e4de;
+  --text-mid:  #888;
+  --text-dim:  #555;
+  --mono:      'DM Mono', monospace;
+  --display:   'Bebas Neue', sans-serif;
+}
+
+html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); }
+body { font-family: var(--mono); font-size: 12px; display: flex; flex-direction: column; }
+
+/* ── HEADER ─────────────────────────────────────────────────────── */
+#header {
+  height: 44px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 20px;
+  flex-shrink: 0;
+  z-index: 30;
+}
+#header .logo {
+  font-family: var(--display);
+  font-size: 20px;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+#header .logo span { color: var(--accent); }
+#header .tool-label {
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  border-left: 1px solid var(--border);
+  padding-left: 20px;
+}
+.hdr-spacer { flex: 1; }
+.hdr-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-mid);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .08em;
+  padding: 5px 12px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all .15s;
+  border-radius: 2px;
+}
+.hdr-btn:hover { border-color: var(--border2); color: var(--text); }
+.hdr-btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.hdr-btn.primary:hover { background: #c94e25; }
+.hdr-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+/* ── MAIN LAYOUT ─────────────────────────────────────────────────── */
+#app { display: flex; flex: 1; overflow: hidden; }
+
+/* ── LEFT PANEL ──────────────────────────────────────────────────── */
+#left-panel {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-block {
+  border-bottom: 1px solid var(--border);
+  padding: 14px 16px;
+}
+.panel-title {
+  font-size: 9px;
+  letter-spacing: .14em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* File drop zone */
+#drop-zone {
+  border: 1px dashed var(--border2);
+  border-radius: 3px;
+  padding: 20px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .15s;
+  color: var(--text-dim);
+  font-size: 11px;
+  line-height: 1.6;
+}
+#drop-zone:hover, #drop-zone.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-lo);
+  color: var(--text);
+}
+#drop-zone input { display: none; }
+#drop-zone .dz-icon {
+  font-size: 22px;
+  display: block;
+  margin-bottom: 6px;
+  opacity: .5;
+}
+#img-info {
+  margin-top: 8px;
+  font-size: 10px;
+  color: var(--text-mid);
+  display: none;
+}
+
+/* Assembly metadata */
+.field-row { margin-bottom: 8px; }
+.field-label {
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.field-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 5px 8px;
+  border-radius: 2px;
+  outline: none;
+  transition: border-color .12s;
+}
+.field-input:focus { border-color: var(--accent); }
+.field-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+/* Tool mode selector */
+#mode-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.mode-btn {
+  flex: 1;
+  min-width: 70px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-mid);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .06em;
+  padding: 7px 8px;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 2px;
+  transition: all .12s;
+  text-transform: uppercase;
+}
+.mode-btn:hover { border-color: var(--border2); color: var(--text); }
+.mode-btn.active { background: var(--accent-lo); border-color: var(--accent); color: var(--accent); }
+
+/* Active placement editor */
+#placement-editor { display: none; }
+#placement-editor.visible { display: block; }
+
+.pe-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.pe-badge {
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--display);
+  font-size: 22px;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+}
+.pe-del {
+  background: none;
+  border: 1px solid var(--red);
+  color: var(--red);
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.pe-del:hover { background: rgba(217,79,79,.1); }
+
+.coord-display {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+.coord-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+.coord-row:last-child { margin-bottom: 0; }
+.coord-key { color: var(--text-dim); font-size: 10px; }
+.coord-val { color: var(--gold); font-size: 10px; font-weight: 500; }
+
+.explode-vec-editor { margin-top: 8px; }
+.vec-row { display: grid; grid-template-columns: 16px 1fr; gap: 6px; align-items: center; margin-bottom: 4px; }
+.vec-axis { font-size: 10px; color: var(--text-dim); text-align: center; }
+.vec-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+}
+.vec-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+.vec-val { font-size: 10px; color: var(--gold); width: 36px; text-align: right; }
+
+.depth-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.depth-label { font-size: 10px; color: var(--text-dim); flex: 1; }
+.depth-input {
+  width: 56px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--gold);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 4px 6px;
+  border-radius: 2px;
+  outline: none;
+  text-align: right;
+}
+.depth-input:focus { border-color: var(--accent); }
+
+/* Placements list */
+#placements-list-wrap {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+#placements-list-wrap::-webkit-scrollbar { width: 4px; }
+#placements-list-wrap::-webkit-scrollbar-thumb { background: var(--border); }
+
+.pl-header {
+  padding: 10px 16px;
+  font-size: 9px;
+  letter-spacing: .14em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+.pl-count { color: var(--accent); }
+
+#placements-list { flex: 1; }
+
+.pl-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.03);
+  cursor: pointer;
+  transition: background .1s;
+}
+.pl-item:hover { background: rgba(255,255,255,.03); }
+.pl-item.selected { background: var(--accent-lo); }
+
+.pl-num {
+  font-family: var(--display);
+  font-size: 16px;
+  color: var(--accent);
+  width: 20px;
+  flex-shrink: 0;
+}
+.pl-name {
+  flex: 1;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pl-coords {
+  font-size: 9px;
+  color: var(--text-dim);
+}
+
+/* empty state */
+.empty-state {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+/* ── CANVAS AREA ─────────────────────────────────────────────────── */
+#canvas-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(255,255,255,.025) 19px, rgba(255,255,255,.025) 20px),
+    repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(255,255,255,.025) 19px, rgba(255,255,255,.025) 20px),
+    var(--bg);
+}
+
+/* Canvas viewport — pannable/zoomable inner container */
+#viewport {
+  position: absolute;
+  top: 0; left: 0;
+  transform-origin: 0 0;
+  cursor: crosshair;
+}
+
+#diagram-img {
+  display: block;
+  image-rendering: pixelated;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* SVG overlay for boxes */
+#overlay-svg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+#overlay-svg .box-rect {
+  pointer-events: all;
+  cursor: pointer;
+}
+#overlay-svg .box-rect:hover { stroke-opacity: 1; }
+
+/* Active draw rect */
+#draw-rect {
+  position: absolute;
+  border: 1.5px dashed var(--accent);
+  background: var(--accent-lo);
+  pointer-events: none;
+  display: none;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.5);
+}
+
+/* ── RIGHT PANEL ─────────────────────────────────────────────────── */
+#right-panel {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Coordinate readout */
+#coord-readout {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+}
+.readout-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  color: var(--text-mid);
+}
+.readout-row span:last-child { color: var(--gold); }
+
+/* Zoom controls */
+#zoom-controls {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.zoom-btn {
+  width: 26px; height: 26px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 2px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .1s;
+}
+.zoom-btn:hover { border-color: var(--accent); color: var(--accent); }
+#zoom-label {
+  flex: 1;
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-mid);
+}
+
+/* Keyboard shortcuts */
+#shortcuts {
+  padding: 14px 16px;
+  flex: 1;
+}
+.shortcut-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  align-items: center;
+}
+.shortcut-key {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-mid);
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  letter-spacing: .04em;
+}
+.shortcut-desc {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+/* json preview */
+#json-preview {
+  flex: 1;
+  overflow: auto;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: none;
+}
+#json-preview pre {
+  font-size: 9px;
+  color: var(--text-dim);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* ── STATUS BAR ──────────────────────────────────────────────────── */
+#status-bar {
+  height: 26px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 18px;
+  flex-shrink: 0;
+}
+.status-item { font-size: 10px; color: var(--text-dim); letter-spacing: .04em; }
+.status-item b { color: var(--text-mid); }
+.status-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--green); margin-right: 5px; box-shadow: 0 0 5px var(--green); }
+.status-mode { color: var(--accent); }
+
+/* ── TOAST ───────────────────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 8px 18px;
+  border-radius: 3px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s, transform .2s;
+  z-index: 999;
+  white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.success { border-color: var(--green); }
+#toast.error { border-color: var(--red); }
+
+/* ── MODAL ───────────────────────────────────────────────────────── */
+#modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.7);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+#modal-overlay.open { display: flex; }
+#modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 24px;
+  width: 340px;
+  max-width: 90vw;
+}
+#modal h3 {
+  font-family: var(--display);
+  font-size: 22px;
+  letter-spacing: .05em;
+  margin-bottom: 16px;
+}
+#modal .modal-field { margin-bottom: 12px; }
+#modal .modal-actions { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+#modal button {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 7px 16px;
+  cursor: pointer;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+#modal button.confirm { background: var(--accent); border-color: var(--accent); color: #fff; }
+#modal button.confirm:hover { background: #c94e25; }
+
+/* no-image overlay */
+#no-image {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  color: var(--text-dim);
+  font-size: 13px;
+  gap: 10px;
+  pointer-events: none;
+}
+#no-image .ni-icon { font-size: 40px; opacity: .3; }
+#no-image .ni-hint { font-size: 10px; letter-spacing: .08em; opacity: .5; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div class="logo">RALLY<span>SUPREME</span></div>
+  <div class="tool-label">Placement Authoring Tool</div>
+  <div class="hdr-spacer"></div>
+  <button class="hdr-btn" id="btn-import-json" title="Re-import existing placements.json to continue editing">Import placements.json</button>
+  <input type="file" id="import-json-input" accept=".json,application/json" style="display:none">
+  <button class="hdr-btn" id="btn-preview-json">Preview JSON</button>
+  <button class="hdr-btn" id="btn-clear" disabled>Clear All</button>
+  <button class="hdr-btn primary" id="btn-export" disabled>Export placements.json</button>
+</div>
+
+<!-- MAIN -->
+<div id="app">
+
+  <!-- LEFT PANEL -->
+  <div id="left-panel">
+
+    <!-- Image load -->
+    <div class="panel-block">
+      <div class="panel-title">1 — Load Diagram</div>
+      <div id="drop-zone">
+        <input type="file" id="file-input" accept="image/*">
+        <span class="dz-icon">⊕</span>
+        Drop diagram image here<br>or click to browse
+      </div>
+      <div id="img-info"></div>
+    </div>
+
+    <!-- Assembly meta -->
+    <div class="panel-block">
+      <div class="panel-title">2 — Assembly Info</div>
+      <div class="field-row">
+        <div class="field-label">Slug</div>
+        <input class="field-input" id="meta-slug" placeholder="ktm-500-exc-f-2025-clutch">
+      </div>
+      <div class="field-row-2col">
+        <div>
+          <div class="field-label">Brand</div>
+          <input class="field-input" id="meta-brand" placeholder="KTM">
+        </div>
+        <div>
+          <div class="field-label">Year</div>
+          <input class="field-input" id="meta-year" placeholder="2025" type="number">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Model</div>
+        <input class="field-input" id="meta-model" placeholder="500 EXC-F">
+      </div>
+      <div class="field-row">
+        <div class="field-label">Assembly</div>
+        <input class="field-input" id="meta-assembly" placeholder="CLUTCH">
+      </div>
+    </div>
+
+    <!-- Tool mode -->
+    <div class="panel-block">
+      <div class="panel-title">3 — Draw Placements</div>
+      <div id="mode-btns">
+        <button class="mode-btn active" data-mode="draw" title="Click and drag to draw a bounding box">✚ Draw</button>
+        <button class="mode-btn" data-mode="select" title="Click boxes to select and edit">↖ Select</button>
+        <button class="mode-btn" data-mode="pan" title="Pan the canvas">⊕ Pan</button>
+      </div>
+    </div>
+
+    <!-- Active placement editor -->
+    <div class="panel-block" id="placement-editor">
+      <div class="panel-title">Edit Placement</div>
+      <div class="pe-header">
+        <div class="pe-badge" id="pe-badge">1</div>
+        <button class="pe-del" id="pe-delete">Delete</button>
+      </div>
+
+      <div class="field-row">
+        <div class="field-label">Label (part #)</div>
+        <input class="field-input" id="pe-label" placeholder="1">
+      </div>
+      <div class="field-row">
+        <div class="field-label">Part Name (optional)</div>
+        <input class="field-input" id="pe-name" placeholder="CLUTCH COVER">
+      </div>
+
+      <div class="coord-display">
+        <div class="coord-row">
+          <span class="coord-key">x (norm)</span><span class="coord-val" id="pe-x">—</span>
+        </div>
+        <div class="coord-row">
+          <span class="coord-key">y (norm)</span><span class="coord-val" id="pe-y">—</span>
+        </div>
+        <div class="coord-row">
+          <span class="coord-key">bbox.w</span><span class="coord-val" id="pe-bw">—</span>
+        </div>
+        <div class="coord-row">
+          <span class="coord-key">bbox.h</span><span class="coord-val" id="pe-bh">—</span>
+        </div>
+      </div>
+
+      <div class="explode-vec-editor">
+        <div class="field-label" style="margin-bottom:6px">Explode Vector</div>
+        <div class="vec-row">
+          <span class="vec-axis">X</span>
+          <input type="range" class="vec-slider" id="vec-x" min="-3" max="3" step="0.05" value="0">
+          <span class="vec-val" id="vec-x-val">0.00</span>
+        </div>
+        <div class="vec-row">
+          <span class="vec-axis">Y</span>
+          <input type="range" class="vec-slider" id="vec-y" min="-3" max="3" step="0.05" value="0">
+          <span class="vec-val" id="vec-y-val">0.00</span>
+        </div>
+        <div class="vec-row">
+          <span class="vec-axis">Z</span>
+          <input type="range" class="vec-slider" id="vec-z" min="-2" max="2" step="0.05" value="0">
+          <span class="vec-val" id="vec-z-val">0.00</span>
+        </div>
+      </div>
+
+      <div class="depth-row">
+        <span class="depth-label">Z depth (layer)</span>
+        <input type="number" class="depth-input" id="pe-z" value="0" step="0.05" min="-1" max="1">
+      </div>
+      <div class="depth-row">
+        <span class="depth-label">Depth order (render)</span>
+        <input type="number" class="depth-input" id="pe-depth-order" value="0" step="1">
+      </div>
+    </div>
+
+    <!-- Placements list -->
+    <div id="placements-list-wrap">
+      <div class="pl-header">
+        <span>Placements</span>
+        <span class="pl-count" id="pl-count">0</span>
+      </div>
+      <div id="placements-list">
+        <div class="empty-state">No placements yet.<br>Load an image and draw boxes.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CANVAS AREA -->
+  <div id="canvas-area">
+    <div id="no-image">
+      <span class="ni-icon">⊡</span>
+      <span>Load a diagram to begin</span>
+      <span class="ni-hint">Supports PNG, JPG, WEBP</span>
+    </div>
+    <div id="viewport">
+      <img id="diagram-img" draggable="false">
+      <svg id="overlay-svg"></svg>
+      <div id="draw-rect"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div id="right-panel">
+
+    <div class="panel-block" style="padding:10px 16px">
+      <div class="panel-title">Canvas</div>
+    </div>
+
+    <div id="zoom-controls">
+      <button class="zoom-btn" id="zoom-out">−</button>
+      <div id="zoom-label">100%</div>
+      <button class="zoom-btn" id="zoom-in">+</button>
+      <button class="zoom-btn" id="zoom-fit" title="Fit to window" style="font-size:11px">⊡</button>
+    </div>
+
+    <div id="coord-readout">
+      <div class="panel-title" style="margin-bottom:8px">Cursor</div>
+      <div class="readout-row"><span>X (px)</span><span id="cur-px">—</span></div>
+      <div class="readout-row"><span>Y (px)</span><span id="cur-py">—</span></div>
+      <div class="readout-row"><span>X (norm)</span><span id="cur-nx">—</span></div>
+      <div class="readout-row"><span>Y (norm)</span><span id="cur-ny">—</span></div>
+    </div>
+
+    <div id="shortcuts">
+      <div class="panel-title" style="margin-bottom:10px">Shortcuts</div>
+      <div class="shortcut-row"><span class="shortcut-key">D</span><span class="shortcut-desc">Draw mode</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">S</span><span class="shortcut-desc">Select mode</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">P</span><span class="shortcut-desc">Pan mode</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">Del</span><span class="shortcut-desc">Delete selected</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">Esc</span><span class="shortcut-desc">Deselect</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">+/−</span><span class="shortcut-desc">Zoom</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">F</span><span class="shortcut-desc">Fit to window</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">E</span><span class="shortcut-desc">Export JSON</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">Space</span><span class="shortcut-desc">Temp pan</span></div>
+    </div>
+
+    <div id="json-preview">
+      <div class="panel-title" style="margin-bottom:8px">JSON Preview</div>
+      <pre id="json-pre"></pre>
+    </div>
+  </div>
+
+</div>
+
+<!-- STATUS BAR -->
+<div id="status-bar">
+  <div class="status-item"><span class="status-dot"></span>READY</div>
+  <div class="status-item">MODE: <span class="status-mode" id="st-mode">DRAW</span></div>
+  <div class="status-item">ZOOM: <b id="st-zoom">—</b></div>
+  <div class="status-item">PLACEMENTS: <b id="st-count">0</b></div>
+  <div class="status-item" id="st-img">NO IMAGE LOADED</div>
+</div>
+
+<!-- LABEL MODAL -->
+<div id="modal-overlay">
+  <div id="modal">
+    <h3>NEW PLACEMENT</h3>
+    <div class="modal-field">
+      <div class="field-label">Part Label (number from diagram)</div>
+      <input class="field-input" id="modal-label" placeholder="1" autofocus style="font-size:20px;padding:8px 10px;">
+    </div>
+    <div class="modal-field">
+      <div class="field-label">Part Name (optional — can fill later)</div>
+      <input class="field-input" id="modal-name" placeholder="CLUTCH COVER">
+    </div>
+    <div class="modal-actions">
+      <button id="modal-cancel">Cancel</button>
+      <button class="confirm" id="modal-confirm">Add Placement</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+const state = {
+  image: null,          // HTMLImageElement
+  imgW: 0, imgH: 0,    // natural dimensions
+  placements: [],       // array of placement objects
+  selected: null,       // selected placement id
+  mode: 'draw',         // 'draw' | 'select' | 'pan'
+  zoom: 1,
+  panX: 0, panY: 0,
+  isDrawing: false,
+  drawStart: null,      // {x, y} in image px
+  pendingBox: null,     // {x1,y1,x2,y2} in image px
+  isPanning: false,
+  panStartMouse: null,
+  panStartOffset: null,
+  spaceDown: false,
+  nextId: 1,
+  showJson: false,
+};
+
+// ── DOM REFS ──────────────────────────────────────────────────────────────────
+const $  = id => document.getElementById(id);
+const dropZone      = $('drop-zone');
+const fileInput     = $('file-input');
+const diagImg       = $('diagram-img');
+const viewport      = $('viewport');
+const overlaySvg    = $('overlay-svg');
+const drawRect      = $('draw-rect');
+const canvasArea    = $('canvas-area');
+const noImage       = $('no-image');
+const modeBtns      = document.querySelectorAll('.mode-btn');
+const placementList = $('placements-list');
+const editor        = $('placement-editor');
+
+// ── UTILITIES ─────────────────────────────────────────────────────────────────
+function uid() { return state.nextId++; }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function fmt(n) { return n.toFixed(3); }
+function fmtShort(n) { return n.toFixed(2); }
+
+function toast(msg, type = '') {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = ''; }, 2200);
+}
+
+// ── IMAGE LOADING ─────────────────────────────────────────────────────────────
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadImage(file);
+});
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) loadImage(fileInput.files[0]);
+});
+
+function loadImage(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      state.image = img;
+      state.imgW = img.naturalWidth;
+      state.imgH = img.naturalHeight;
+      diagImg.src = img.src;
+      diagImg.style.width  = img.naturalWidth + 'px';
+      diagImg.style.height = img.naturalHeight + 'px';
+      overlaySvg.setAttribute('width', img.naturalWidth);
+      overlaySvg.setAttribute('height', img.naturalHeight);
+      noImage.style.display = 'none';
+      $('img-info').style.display = 'block';
+      $('img-info').textContent = `${img.naturalWidth} × ${img.naturalHeight} — ${file.name}`;
+      $('st-img').textContent = `${img.naturalWidth}×${img.naturalHeight} · ${file.name}`;
+      $('btn-export').disabled = false;
+      $('btn-clear').disabled = false;
+      fitToWindow();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── VIEWPORT TRANSFORM ────────────────────────────────────────────────────────
+function applyTransform() {
+  viewport.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
+  $('zoom-label').textContent = Math.round(state.zoom * 100) + '%';
+  $('st-zoom').textContent = Math.round(state.zoom * 100) + '%';
+}
+
+function fitToWindow() {
+  if (!state.image) return;
+  const aw = canvasArea.clientWidth - 60;
+  const ah = canvasArea.clientHeight - 60;
+  const scale = Math.min(aw / state.imgW, ah / state.imgH, 2);
+  state.zoom = scale;
+  state.panX = (canvasArea.clientWidth  - state.imgW * scale) / 2;
+  state.panY = (canvasArea.clientHeight - state.imgH * scale) / 2;
+  applyTransform();
+}
+
+$('zoom-in').addEventListener('click', () => zoomAt(canvasArea.clientWidth/2, canvasArea.clientHeight/2, 1.25));
+$('zoom-out').addEventListener('click', () => zoomAt(canvasArea.clientWidth/2, canvasArea.clientHeight/2, 0.8));
+$('zoom-fit').addEventListener('click', fitToWindow);
+
+function zoomAt(cx, cy, factor) {
+  const newZoom = clamp(state.zoom * factor, 0.1, 8);
+  const ratio = newZoom / state.zoom;
+  state.panX = cx - (cx - state.panX) * ratio;
+  state.panY = cy - (cy - state.panY) * ratio;
+  state.zoom = newZoom;
+  applyTransform();
+}
+
+// Mouse wheel zoom
+canvasArea.addEventListener('wheel', e => {
+  e.preventDefault();
+  const rect = canvasArea.getBoundingClientRect();
+  const cx = e.clientX - rect.left;
+  const cy = e.clientY - rect.top;
+  zoomAt(cx, cy, e.deltaY < 0 ? 1.12 : 1/1.12);
+}, { passive: false });
+
+// ── COORDINATE HELPERS ────────────────────────────────────────────────────────
+// Convert canvas-area client coords to image pixel coords
+function clientToImage(cx, cy) {
+  const rect = canvasArea.getBoundingClientRect();
+  const vx = (cx - rect.left - state.panX) / state.zoom;
+  const vy = (cy - rect.top  - state.panY) / state.zoom;
+  return { x: vx, y: vy };
+}
+
+function imageToNorm(px, py) {
+  return { x: px / state.imgW, y: py / state.imgH };
+}
+
+// ── CURSOR READOUT ────────────────────────────────────────────────────────────
+canvasArea.addEventListener('mousemove', e => {
+  const ip = clientToImage(e.clientX, e.clientY);
+  const np = imageToNorm(ip.x, ip.y);
+  $('cur-px').textContent = Math.round(ip.x);
+  $('cur-py').textContent = Math.round(ip.y);
+  $('cur-nx').textContent = fmt(clamp(np.x, 0, 1));
+  $('cur-ny').textContent = fmt(clamp(np.y, 0, 1));
+});
+
+// ── MODE SWITCHING ────────────────────────────────────────────────────────────
+function setMode(mode) {
+  state.mode = mode;
+  modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  $('st-mode').textContent = mode.toUpperCase();
+  canvasArea.style.cursor = mode === 'pan' ? 'grab' : 'crosshair';
+}
+modeBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+
+// ── DRAW INTERACTION ──────────────────────────────────────────────────────────
+let panMouseStart = null;
+
+canvasArea.addEventListener('mousedown', e => {
+  if (!state.image) return;
+  if (e.button === 1 || state.spaceDown || state.mode === 'pan') {
+    // Pan
+    state.isPanning = true;
+    panMouseStart = { x: e.clientX, y: e.clientY };
+    state.panStartOffset = { x: state.panX, y: state.panY };
+    canvasArea.style.cursor = 'grabbing';
+    return;
+  }
+  if (state.mode === 'draw' && e.button === 0) {
+    const ip = clientToImage(e.clientX, e.clientY);
+    if (ip.x < 0 || ip.y < 0 || ip.x > state.imgW || ip.y > state.imgH) return;
+    state.isDrawing = true;
+    state.drawStart = ip;
+    state.pendingBox = null;
+    drawRect.style.display = 'block';
+    updateDrawRect(ip, ip);
+  }
+});
+
+window.addEventListener('mousemove', e => {
+  if (state.isPanning && panMouseStart) {
+    const dx = e.clientX - panMouseStart.x;
+    const dy = e.clientY - panMouseStart.y;
+    state.panX = state.panStartOffset.x + dx;
+    state.panY = state.panStartOffset.y + dy;
+    applyTransform();
+    return;
+  }
+  if (state.isDrawing && state.drawStart) {
+    const ip = clientToImage(e.clientX, e.clientY);
+    updateDrawRect(state.drawStart, ip);
+  }
+});
+
+window.addEventListener('mouseup', e => {
+  if (state.isPanning) {
+    state.isPanning = false;
+    panMouseStart = null;
+    canvasArea.style.cursor = state.mode === 'pan' ? 'grab' : 'crosshair';
+    return;
+  }
+  if (state.isDrawing && e.button === 0) {
+    state.isDrawing = false;
+    const ip = clientToImage(e.clientX, e.clientY);
+    const x1 = Math.min(state.drawStart.x, ip.x);
+    const y1 = Math.min(state.drawStart.y, ip.y);
+    const x2 = Math.max(state.drawStart.x, ip.x);
+    const y2 = Math.max(state.drawStart.y, ip.y);
+    drawRect.style.display = 'none';
+
+    if ((x2 - x1) < 4 || (y2 - y1) < 4) return; // too small
+    state.pendingBox = { x1, y1, x2, y2 };
+    openModal();
+  }
+});
+
+function updateDrawRect(a, b) {
+  const rect = canvasArea.getBoundingClientRect();
+  const x1s = Math.min(a.x, b.x) * state.zoom + state.panX;
+  const y1s = Math.min(a.y, b.y) * state.zoom + state.panY;
+  const x2s = Math.max(a.x, b.x) * state.zoom + state.panX;
+  const y2s = Math.max(a.y, b.y) * state.zoom + state.panY;
+  drawRect.style.left   = x1s + 'px';
+  drawRect.style.top    = y1s + 'px';
+  drawRect.style.width  = (x2s - x1s) + 'px';
+  drawRect.style.height = (y2s - y1s) + 'px';
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function openModal() {
+  $('modal-label').value = suggestNextLabel();
+  $('modal-name').value = '';
+  $('modal-overlay').classList.add('open');
+  setTimeout(() => $('modal-label').focus(), 60);
+}
+
+function closeModal() { $('modal-overlay').classList.remove('open'); }
+
+$('modal-cancel').addEventListener('click', closeModal);
+$('modal-overlay').addEventListener('click', e => { if (e.target === $('modal-overlay')) closeModal(); });
+
+$('modal-confirm').addEventListener('click', confirmPlacement);
+$('modal-label').addEventListener('keydown', e => { if (e.key === 'Enter') confirmPlacement(); });
+$('modal-name').addEventListener('keydown', e => { if (e.key === 'Enter') confirmPlacement(); });
+
+function suggestNextLabel() {
+  // Find the highest numeric label and add 1
+  const nums = state.placements.map(p => parseInt(p.label)).filter(n => !isNaN(n));
+  return nums.length ? String(Math.max(...nums) + 1) : '1';
+}
+
+function confirmPlacement() {
+  const label = $('modal-label').value.trim();
+  if (!label) { $('modal-label').focus(); return; }
+  if (state.placements.find(p => p.label === label)) {
+    toast(`Label "${label}" already exists`, 'error');
+    return;
+  }
+  const b = state.pendingBox;
+  const cx = (b.x1 + b.x2) / 2;
+  const cy = (b.y1 + b.y2) / 2;
+  const w  = b.x2 - b.x1;
+  const h  = b.y2 - b.y1;
+
+  const placement = {
+    _id: uid(),
+    label,
+    name: $('modal-name').value.trim(),
+    x: clamp(cx / state.imgW, 0, 1),
+    y: clamp(cy / state.imgH, 0, 1),
+    z: 0,
+    depth_order: state.placements.length,
+    explode_vector: [0, 0, 0],
+    bbox: {
+      x: clamp(b.x1 / state.imgW, 0, 1),
+      y: clamp(b.y1 / state.imgH, 0, 1),
+      w: clamp(w / state.imgW, 0, 1),
+      h: clamp(h / state.imgH, 0, 1),
+    },
+    anchor: { x: 0.5, y: 0.5 },
+    segment_image: `parts/${label.padStart(3,'0')}.png`,
+    // pixel coords for display
+    _px: Math.round(b.x1), _py: Math.round(b.y1),
+    _pw: Math.round(w), _ph: Math.round(h),
+  };
+
+  state.placements.push(placement);
+  closeModal();
+  renderAll();
+  selectPlacement(placement._id);
+  toast(`Placement ${label} added`, 'success');
+}
+
+// ── RENDER SVG BOXES ──────────────────────────────────────────────────────────
+function renderAll() {
+  renderSvgBoxes();
+  renderPlacementList();
+  $('pl-count').textContent = state.placements.length;
+  $('st-count').textContent = state.placements.length;
+  if (state.showJson) updateJsonPreview();
+}
+
+function renderSvgBoxes() {
+  overlaySvg.innerHTML = '';
+  state.placements.forEach(p => {
+    const isSelected = p._id === state.selected;
+    const bx = p.bbox.x * state.imgW;
+    const by = p.bbox.y * state.imgH;
+    const bw = p.bbox.w * state.imgW;
+    const bh = p.bbox.h * state.imgH;
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+    // Box
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', bx);
+    rect.setAttribute('y', by);
+    rect.setAttribute('width', bw);
+    rect.setAttribute('height', bh);
+    rect.setAttribute('fill', isSelected ? 'rgba(232,92,46,0.18)' : 'rgba(232,92,46,0.07)');
+    rect.setAttribute('stroke', isSelected ? '#e85c2e' : 'rgba(232,92,46,0.5)');
+    rect.setAttribute('stroke-width', isSelected ? 1.5 / state.zoom : 1 / state.zoom);
+    rect.setAttribute('class', 'box-rect');
+    rect.style.pointerEvents = 'all';
+    rect.style.cursor = 'pointer';
+    rect.addEventListener('click', e => {
+      e.stopPropagation();
+      setMode('select');
+      selectPlacement(p._id);
+    });
+    g.appendChild(rect);
+
+    // Center dot
+    const cx = p.x * state.imgW;
+    const cy = p.y * state.imgH;
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('cx', cx);
+    dot.setAttribute('cy', cy);
+    dot.setAttribute('r', 3 / state.zoom);
+    dot.setAttribute('fill', '#e85c2e');
+    dot.style.pointerEvents = 'none';
+    g.appendChild(dot);
+
+    // Label badge
+    const badgeR = 10 / state.zoom;
+    const badgeX = bx + badgeR + 2 / state.zoom;
+    const badgeY = by + badgeR + 2 / state.zoom;
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', badgeX);
+    circle.setAttribute('cy', badgeY);
+    circle.setAttribute('r', badgeR);
+    circle.setAttribute('fill', '#e85c2e');
+    circle.style.pointerEvents = 'none';
+    g.appendChild(circle);
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', badgeX);
+    text.setAttribute('y', badgeY + 0.35 * (14 / state.zoom));
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('dominant-baseline', 'middle');
+    text.setAttribute('fill', '#fff');
+    text.setAttribute('font-family', 'Bebas Neue, monospace');
+    text.setAttribute('font-size', 13 / state.zoom);
+    text.style.pointerEvents = 'none';
+    text.textContent = p.label;
+    g.appendChild(text);
+
+    // Explode vector arrow (if nonzero)
+    const ev = p.explode_vector;
+    if (ev[0] !== 0 || ev[1] !== 0) {
+      const arrowScale = 40;
+      const ax = cx + ev[0] * arrowScale;
+      const ay = cy + ev[1] * arrowScale;
+      const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      arrow.setAttribute('x1', cx); arrow.setAttribute('y1', cy);
+      arrow.setAttribute('x2', ax); arrow.setAttribute('y2', ay);
+      arrow.setAttribute('stroke', '#c8952a');
+      arrow.setAttribute('stroke-width', 1.5 / state.zoom);
+      arrow.setAttribute('stroke-dasharray', `${4/state.zoom},${3/state.zoom}`);
+      arrow.style.pointerEvents = 'none';
+      g.appendChild(arrow);
+
+      const tip = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      tip.setAttribute('cx', ax); tip.setAttribute('cy', ay);
+      tip.setAttribute('r', 2.5 / state.zoom);
+      tip.setAttribute('fill', '#c8952a');
+      tip.style.pointerEvents = 'none';
+      g.appendChild(tip);
+    }
+
+    overlaySvg.appendChild(g);
+  });
+}
+
+function renderPlacementList() {
+  if (state.placements.length === 0) {
+    placementList.innerHTML = '<div class="empty-state">No placements yet.<br>Load an image and draw boxes.</div>';
+    return;
+  }
+  const sorted = [...state.placements].sort((a, b) => {
+    const na = parseInt(a.label), nb = parseInt(b.label);
+    if (!isNaN(na) && !isNaN(nb)) return na - nb;
+    return a.label.localeCompare(b.label);
+  });
+  placementList.innerHTML = sorted.map(p => `
+    <div class="pl-item ${p._id === state.selected ? 'selected' : ''}" data-id="${p._id}">
+      <div class="pl-num">${p.label}</div>
+      <div class="pl-name">${p.name || '—'}</div>
+      <div class="pl-coords">${fmt(p.x)}, ${fmt(p.y)}</div>
+    </div>
+  `).join('');
+  placementList.querySelectorAll('.pl-item').forEach(el => {
+    el.addEventListener('click', () => selectPlacement(parseInt(el.dataset.id)));
+  });
+}
+
+// ── SELECTION ─────────────────────────────────────────────────────────────────
+function selectPlacement(id) {
+  state.selected = id;
+  const p = state.placements.find(p => p._id === id);
+  if (!p) { deselectPlacement(); return; }
+
+  editor.classList.add('visible');
+  $('pe-badge').textContent = p.label;
+  $('pe-label').value = p.label;
+  $('pe-name').value  = p.name || '';
+  $('pe-x').textContent  = fmt(p.x);
+  $('pe-y').textContent  = fmt(p.y);
+  $('pe-bw').textContent = fmt(p.bbox.w);
+  $('pe-bh').textContent = fmt(p.bbox.h);
+  $('vec-x').value   = p.explode_vector[0];
+  $('vec-y').value   = p.explode_vector[1];
+  $('vec-z').value   = p.explode_vector[2];
+  $('vec-x-val').textContent = fmtShort(p.explode_vector[0]);
+  $('vec-y-val').textContent = fmtShort(p.explode_vector[1]);
+  $('vec-z-val').textContent = fmtShort(p.explode_vector[2]);
+  $('pe-z').value = p.z;
+  $('pe-depth-order').value = p.depth_order;
+
+  renderAll();
+}
+
+function deselectPlacement() {
+  state.selected = null;
+  editor.classList.remove('visible');
+  renderAll();
+}
+
+// Deselect on canvas click
+overlaySvg.addEventListener('click', e => {
+  if (e.target === overlaySvg) deselectPlacement();
+});
+
+// ── EDITOR EVENTS ─────────────────────────────────────────────────────────────
+function getSelected() { return state.placements.find(p => p._id === state.selected); }
+
+$('pe-label').addEventListener('input', () => {
+  const p = getSelected(); if (!p) return;
+  const newLabel = $('pe-label').value.trim();
+  if (!newLabel) return;
+  if (state.placements.find(q => q.label === newLabel && q._id !== p._id)) {
+    toast(`Label "${newLabel}" already used`, 'error'); return;
+  }
+  p.label = newLabel;
+  $('pe-badge').textContent = newLabel;
+  p.segment_image = `parts/${newLabel.padStart(3,'0')}.png`;
+  renderAll();
+});
+
+$('pe-name').addEventListener('input', () => {
+  const p = getSelected(); if (!p) return;
+  p.name = $('pe-name').value;
+  renderAll();
+});
+
+['vec-x','vec-y','vec-z'].forEach((id, i) => {
+  $(id).addEventListener('input', () => {
+    const p = getSelected(); if (!p) return;
+    const v = parseFloat($(id).value);
+    p.explode_vector[i] = v;
+    $(`${id}-val`).textContent = fmtShort(v);
+    renderSvgBoxes(); // lightweight refresh
+  });
+});
+
+$('pe-z').addEventListener('input', () => {
+  const p = getSelected(); if (!p) return;
+  p.z = parseFloat($('pe-z').value) || 0;
+});
+$('pe-depth-order').addEventListener('input', () => {
+  const p = getSelected(); if (!p) return;
+  p.depth_order = parseInt($('pe-depth-order').value) || 0;
+});
+
+$('pe-delete').addEventListener('click', () => {
+  const p = getSelected(); if (!p) return;
+  state.placements = state.placements.filter(q => q._id !== p._id);
+  deselectPlacement();
+  toast(`Placement ${p.label} deleted`);
+});
+
+// ── EXPORT ────────────────────────────────────────────────────────────────────
+function buildExportData() {
+  const sorted = [...state.placements].sort((a, b) => {
+    const na = parseInt(a.label), nb = parseInt(b.label);
+    if (!isNaN(na) && !isNaN(nb)) return na - nb;
+    return a.label.localeCompare(b.label);
+  });
+  return sorted.map(p => {
+    const out = {
+      label: p.label,
+      x: parseFloat(fmt(p.x)),
+      y: parseFloat(fmt(p.y)),
+      z: p.z,
+      depth_order: p.depth_order,
+      explode_vector: p.explode_vector.map(v => parseFloat(fmtShort(v))),
+      segment_image: p.segment_image,
+      bbox: {
+        x: parseFloat(fmt(p.bbox.x)),
+        y: parseFloat(fmt(p.bbox.y)),
+        w: parseFloat(fmt(p.bbox.w)),
+        h: parseFloat(fmt(p.bbox.h)),
+      },
+      anchor: p.anchor,
+    };
+    if (p.name) out._name_hint = p.name; // non-standard, useful for cross-ref with parts.json
+    return out;
+  });
+}
+
+function exportJSON() {
+  if (!state.image) { toast('Load an image first', 'error'); return; }
+  const data = buildExportData();
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'placements.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('placements.json downloaded', 'success');
+}
+
+$('btn-export').addEventListener('click', exportJSON);
+
+// Also export assembly.json stub
+function exportAssemblyJSON() {
+  if (!state.image) return;
+  const slug = $('meta-slug').value.trim() || 'assembly-slug';
+  const data = {
+    slug,
+    brand:    $('meta-brand').value.trim() || 'BRAND',
+    model:    $('meta-model').value.trim() || 'MODEL',
+    year:     parseInt($('meta-year').value) || 2025,
+    assembly: $('meta-assembly').value.trim() || 'ASSEMBLY',
+    diagram_image: 'diagram.png',
+    canvas: { width: state.imgW, height: state.imgH },
+    viewer_defaults: {
+      world_height: 10,
+      world_depth: 5,
+      explode_distance: 2.0,
+      show_background_diagram: true,
+    },
+    source: { provider: 'manual', url: '' },
+  };
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'assembly.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('assembly.json downloaded', 'success');
+}
+
+// Clear all
+$('btn-clear').addEventListener('click', () => {
+  if (!confirm('Delete all placements?')) return;
+  state.placements = [];
+  state.selected = null;
+  editor.classList.remove('visible');
+  renderAll();
+  toast('Cleared');
+});
+
+// ── RE-IMPORT placements.json ─────────────────────────────────────────────────
+// Lets you continue editing an existing placements.json file.
+// All valid placements are loaded and rendered on top of the current diagram.
+// Merges by label: existing placements with matching labels are REPLACED.
+// New labels are appended.
+
+$('btn-import-json').addEventListener('click', () => {
+  $('import-json-input').value = ''; // reset so same file can be re-imported
+  $('import-json-input').click();
+});
+
+$('import-json-input').addEventListener('change', () => {
+  const file = $('import-json-input').files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      importPlacementsJSON(JSON.parse(ev.target.result));
+    } catch (err) {
+      toast('Invalid JSON — ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+});
+
+function importPlacementsJSON(data) {
+  if (!Array.isArray(data)) {
+    toast('Expected a JSON array of placements', 'error');
+    return;
+  }
+
+  let imported = 0;
+  let skipped  = 0;
+  let replaced = 0;
+
+  data.forEach(raw => {
+    // Minimal validation — must have label + bbox
+    if (!raw.label) { skipped++; return; }
+    if (!raw.bbox || raw.bbox.x == null) { skipped++; return; }
+
+    // Build internal placement record from JSON fields
+    const p = {
+      _id:    uid(),
+      label:  String(raw.label),
+      name:   raw._name_hint || '',  // restore name hint if present
+      x:      raw.x   ?? 0.5,
+      y:      raw.y   ?? 0.5,
+      z:      raw.z   ?? 0,
+      depth_order:    raw.depth_order    ?? 0,
+      explode_vector: Array.isArray(raw.explode_vector) ? raw.explode_vector : [0, 0, 0],
+      segment_image:  raw.segment_image  ?? labelToFilename(String(raw.label)),
+      bbox: {
+        x: raw.bbox.x ?? 0,
+        y: raw.bbox.y ?? 0,
+        w: raw.bbox.w ?? 0.1,
+        h: raw.bbox.h ?? 0.1,
+      },
+      anchor: raw.anchor ?? { x: 0.5, y: 0.5 },
+      // pixel coords for display — computed from bbox + image size (if image loaded)
+      _px: state.imgW ? Math.round(raw.bbox.x * state.imgW) : 0,
+      _py: state.imgH ? Math.round(raw.bbox.y * state.imgH) : 0,
+      _pw: state.imgW ? Math.round(raw.bbox.w * state.imgW) : 0,
+      _ph: state.imgH ? Math.round(raw.bbox.h * state.imgH) : 0,
+    };
+
+    // Merge: replace existing label or append
+    const existingIdx = state.placements.findIndex(q => q.label === p.label);
+    if (existingIdx >= 0) {
+      state.placements[existingIdx] = p;
+      replaced++;
+    } else {
+      state.placements.push(p);
+      imported++;
+    }
+
+    // Keep nextId ahead of highest imported id
+    const n = parseInt(p.label);
+    if (!isNaN(n) && n >= state.nextId) state.nextId = n + 1;
+  });
+
+  // Enable export/clear now that we have placements (even without image)
+  $('btn-export').disabled = false;
+  $('btn-clear').disabled  = false;
+
+  deselectPlacement();
+  renderAll();
+
+  const msg = [
+    imported  > 0 ? `${imported} added`   : '',
+    replaced  > 0 ? `${replaced} updated` : '',
+    skipped   > 0 ? `${skipped} skipped`  : '',
+  ].filter(Boolean).join(', ');
+  toast(`Imported: ${msg}`, 'success');
+}
+
+// Mirror of the PIPELINE.md filename rule, used during import
+function labelToFilename(label) {
+  const n = parseInt(label);
+  return isNaN(n)
+    ? `parts/${label}.png`
+    : `parts/${String(n).padStart(3, '0')}.png`;
+}
+
+// JSON preview
+$('btn-preview-json').addEventListener('click', () => {
+  state.showJson = !state.showJson;
+  const panel = $('json-preview');
+  const shortcuts = $('shortcuts');
+  if (state.showJson) {
+    panel.style.display = 'block';
+    shortcuts.style.display = 'none';
+    updateJsonPreview();
+    $('btn-preview-json').textContent = 'Hide JSON';
+  } else {
+    panel.style.display = 'none';
+    shortcuts.style.display = 'block';
+    $('btn-preview-json').textContent = 'Preview JSON';
+  }
+});
+
+function updateJsonPreview() {
+  const data = buildExportData();
+  $('json-pre').textContent = JSON.stringify(data, null, 2);
+}
+
+// ── KEYBOARD SHORTCUTS ────────────────────────────────────────────────────────
+window.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  switch (e.key.toLowerCase()) {
+    case 'd': setMode('draw'); break;
+    case 's': setMode('select'); break;
+    case 'p': setMode('pan'); break;
+    case 'f': fitToWindow(); break;
+    case 'e': exportJSON(); break;
+    case 'escape': deselectPlacement(); break;
+    case 'delete':
+    case 'backspace':
+      if (state.selected) {
+        const p = getSelected();
+        if (p) {
+          state.placements = state.placements.filter(q => q._id !== p._id);
+          deselectPlacement();
+          toast(`Placement ${p.label} deleted`);
+        }
+      }
+      break;
+    case '=':
+    case '+': zoomAt(canvasArea.clientWidth/2, canvasArea.clientHeight/2, 1.25); break;
+    case '-': zoomAt(canvasArea.clientWidth/2, canvasArea.clientHeight/2, 0.8); break;
+    case ' ':
+      e.preventDefault();
+      if (!state.spaceDown) {
+        state.spaceDown = true;
+        canvasArea.style.cursor = 'grab';
+      }
+      break;
+  }
+});
+
+window.addEventListener('keyup', e => {
+  if (e.key === ' ') {
+    state.spaceDown = false;
+    canvasArea.style.cursor = state.mode === 'pan' ? 'grab' : 'crosshair';
+  }
+});
+
+// ── RESIZE ────────────────────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  if (state.image) fitToWindow();
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+applyTransform();
+</script>
+</body>
+</html>

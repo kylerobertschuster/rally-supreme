@@ -1,0 +1,281 @@
+[
+  {
+    "label": "1",
+    "part_number": "23200-MAN-690",
+    "name": "COUNTERSHAFT",
+    "qty": "1",
+    "notes": "1993-2022 XR650L. Inspect splines for wear before reassembly.",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "2",
+    "part_number": "23211-MN9-000",
+    "name": "MAINSHAFT",
+    "qty": "1",
+    "notes": "Inspect bearing surfaces and snap ring grooves for wear.",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "3",
+    "part_number": "23421-MN9-000",
+    "name": "GEAR, MAINSHAFT SECOND (33T)",
+    "qty": "1",
+    "notes": "Pairs with countershaft second gear. If countershaft 2nd is worn, inspect this gear also.",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "4",
+    "part_number": "23431-MN9-000",
+    "name": "GEAR, COUNTERSHAFT SECOND (28T)",
+    "qty": "1",
+    "notes": "\u26a0 COMMON FAILURE \u2014 gear dogs wear causing false neutrals between 1st and 2nd. Inspect dog engagement faces carefully.",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "5",
+    "part_number": "23411-MN9-000",
+    "name": "GEAR, MAINSHAFT FIRST (38T)",
+    "qty": "1",
+    "notes": "",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "6",
+    "part_number": "23441-MN9-000",
+    "name": "GEAR, COUNTERSHAFT THIRD (25T)",
+    "qty": "1",
+    "notes": "Also available as NX650 ratio upgrade: 23451-MN9-000.",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "7",
+    "part_number": "23461-MN9-000",
+    "name": "GEAR, MAINSHAFT FOURTH (28T)",
+    "qty": "1",
+    "notes": "",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "8",
+    "part_number": "23471-MN9-000",
+    "name": "GEAR, COUNTERSHAFT FOURTH (23T)",
+    "qty": "1",
+    "notes": "",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "9",
+    "part_number": "23481-MN9-000",
+    "name": "GEAR, MAINSHAFT FIFTH (24T)",
+    "qty": "1",
+    "notes": "",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "10",
+    "part_number": "23491-MW2-780",
+    "name": "GEAR, COUNTERSHAFT FIFTH (20T)",
+    "qty": "1",
+    "notes": "NX650 5th gear. Popular upgrade swap \u2014 improves highway cruising.",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "11",
+    "part_number": "23801-MN9-000",
+    "name": "FORK, GEARSHIFT (L)",
+    "qty": "1",
+    "notes": "Left shift fork. Engages 1st/2nd gear dogs. Inspect fork fingers for wear.",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "12",
+    "part_number": "23811-MN9-000",
+    "name": "FORK, GEARSHIFT (C)",
+    "qty": "1",
+    "notes": "Center shift fork. Inspect fork fingers for wear.",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "13",
+    "part_number": "23821-MN9-000",
+    "name": "FORK, GEARSHIFT (R)",
+    "qty": "1",
+    "notes": "Right shift fork.",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "14",
+    "part_number": "23831-MN9-000",
+    "name": "SHAFT, GEARSHIFT FORK",
+    "qty": "1",
+    "notes": "",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "15",
+    "part_number": "91207-MN9-003",
+    "name": "BEARING, RADIAL BALL (6205)",
+    "qty": "2",
+    "notes": "Mainshaft bearings. Replace on case split \u2014 cheap insurance.",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "16",
+    "part_number": "91204-MN9-003",
+    "name": "BEARING, RADIAL BALL (6204)",
+    "qty": "2",
+    "notes": "Countershaft bearings. Replace on case split \u2014 cheap insurance.",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "17",
+    "part_number": "90601-MN9-000",
+    "name": "CIRCLIP (INT. 30MM)",
+    "qty": "4",
+    "notes": "Always replace circlips on disassembly. Never reuse.",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "18",
+    "part_number": "23231-MN9-000",
+    "name": "WASHER, THRUST (31X37X1.0)",
+    "qty": "2",
+    "notes": "Note orientation on disassembly.",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "19",
+    "part_number": "23486-MN9-010",
+    "name": "GEAR, COUNTERSHAFT FIFTH B",
+    "qty": "1",
+    "notes": "",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "20",
+    "part_number": "23601-MN9-000",
+    "name": "STOPPER, GEARSHIFT",
+    "qty": "1",
+    "notes": "",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "21",
+    "part_number": "90015-MN9-000",
+    "name": "BOLT, FLANGE (6X12)",
+    "qty": "1",
+    "notes": "",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "22",
+    "part_number": "23423-MN9-000",
+    "name": "GEAR, MAINSHAFT SECOND LOW (35T)",
+    "qty": "1",
+    "notes": "",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "23",
+    "part_number": "90441-MN9-000",
+    "name": "CIRCLIP (INT. 26MM)",
+    "qty": "4",
+    "notes": "Replace on disassembly.",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "24",
+    "part_number": "23231-MN9-010",
+    "name": "WASHER, THRUST (24X30X1)",
+    "qty": "3",
+    "notes": "",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "25",
+    "part_number": "23231-MN9-020",
+    "name": "WASHER, THRUST (26X32X1)",
+    "qty": "3",
+    "notes": "",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "26",
+    "part_number": "23455-MN9-000",
+    "name": "GEAR, MAINSHAFT THIRD LOW (31T)",
+    "qty": "1",
+    "notes": "",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "27",
+    "part_number": "23121-MN9-000",
+    "name": "GEAR, PRIMARY DRIVEN (65T)",
+    "qty": "1",
+    "notes": "",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "28",
+    "part_number": "91207-MN9-003",
+    "name": "BEARING, RADIAL BALL (6205UU)",
+    "qty": "1",
+    "notes": "",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "29",
+    "part_number": "23245-MN9-000",
+    "name": "COLLAR, MAINSHAFT",
+    "qty": "1",
+    "notes": "",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "30",
+    "part_number": "91204-MN9-003",
+    "name": "BEARING, RADIAL BALL (6204UU)",
+    "qty": "1",
+    "notes": "",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  },
+  {
+    "label": "31",
+    "part_number": "91002-MN9-003",
+    "name": "BEARING, RADIAL BALL (6302UU)",
+    "qty": "1",
+    "notes": "",
+    "superseded_by": "",
+    "assembly_slug": "honda-xr650l-1997-transmission"
+  }
+]

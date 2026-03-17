@@ -1,0 +1,18 @@
+{
+  "schema_version": 2,
+  "slug": "honda-xr650l-1997-crankcase",
+  "brand": "Honda",
+  "model": "XR650L",
+  "year": 1997,
+  "assembly": "CRANKCASE",
+  "diagram_image": "diagram.png",
+  "canvas": { "width": 1500, "height": 734 },
+  "viewer_defaults": {
+    "world_height": 10,
+    "world_depth": 6,
+    "explode_distance": 2.2,
+    "show_background_diagram": true,
+    "background_opacity": 0.22
+  },
+  "source": { "provider": "cmsnl", "url": "https://www.cmsnl.com/honda-xr650l-1997-v-usa_model7793/partslist/" }
+}
